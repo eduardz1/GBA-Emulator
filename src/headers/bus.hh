@@ -2,6 +2,7 @@
 #define BUS_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 template <typename T>//T is the bit width of the bus
 class Bus
@@ -15,7 +16,7 @@ public:
 };
 
 template <typename T>
-class BIOS_ROM_Bus : public Bus
+class BIOS_ROM_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -25,7 +26,7 @@ public:
 };
 
 template <typename T>
-class WRAM32K_Bus : public  Bus
+class WRAM32K_Bus : public  Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -34,7 +35,7 @@ public:
 };
 
 template <typename T>
-class IO_Bus : public Bus
+class IO_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -43,7 +44,7 @@ public:
 };
 
 template <typename T>
-class OAM : public Bus
+class OAM : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -52,17 +53,19 @@ public:
 };
 
 template <typename T>
-class WRAM256K_Bus : public Bus
+class WRAM256K_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
-    int Bus::read(WRAM256K_Bus* address,int flag);
     WRAM256K_Bus();
+    void f(){
+        printf("belle palle \n");
+    }
     ~WRAM256K_Bus();
 };
 
 template <typename T>
-class PRAM_Bus : public Bus
+class PRAM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -71,7 +74,7 @@ public:
 };
 
 template <typename T>
-class VRAM_Bus : public Bus
+class VRAM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -80,7 +83,7 @@ public:
 };
 
 template <typename T>
-class GamePak_ROM_Bus : public Bus
+class GamePak_ROM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -89,7 +92,7 @@ public:
 };
 
 template <typename T>
-class GamePak_Flash_Bus : public Bus
+class GamePak_Flash_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -98,7 +101,7 @@ public:
 };
 
 template <typename T>
-class GamePak_SRAM_Bus : public Bus
+class GamePak_SRAM_Bus : public Bus<uint8_t>
 {
 public:
     uint8_t bitfield;
