@@ -5,17 +5,14 @@
 
 template <typename T>//T is the bit width of the bus
 class Bus
-{
-    
+{   
 public:
-    T bitfield;
-    virtual void f() = 0; // dumb code
-    
-    int read(Bus* address,int flag);
+    T bitfield;   
+    int read();
 };
 
 template <typename T>
-class BIOS_ROM_Bus : public Bus
+class BIOS_ROM_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -25,7 +22,7 @@ public:
 };
 
 template <typename T>
-class WRAM32K_Bus : public  Bus
+class WRAM32K_Bus : public  Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -34,7 +31,7 @@ public:
 };
 
 template <typename T>
-class IO_Bus : public Bus
+class IO_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -43,7 +40,7 @@ public:
 };
 
 template <typename T>
-class OAM_Bus : public Bus
+class OAM_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
@@ -52,17 +49,17 @@ public:
 };
 
 template <typename T>
-class WRAM256K_Bus : public Bus
+class WRAM256K_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
-    Bus<T>::read();
-    WRAM256K_Bus();
-    ~WRAM256K_Bus();
+    WRAM256K_Bus() {}
+    ~WRAM256K_Bus(){}
+    //int Bus<uint16_t>::read();
 };
 
 template <typename T>
-class PRAM_Bus : public Bus
+class PRAM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -71,7 +68,7 @@ public:
 };
 
 template <typename T>
-class VRAM_Bus : public Bus
+class VRAM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -80,7 +77,7 @@ public:
 };
 
 template <typename T>
-class GamePak_ROM_Bus : public Bus
+class GamePak_ROM_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -89,7 +86,7 @@ public:
 };
 
 template <typename T>
-class GamePak_Flash_Bus : public Bus
+class GamePak_Flash_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
@@ -98,7 +95,7 @@ public:
 };
 
 template <typename T>
-class GamePak_SRAM_Bus : public Bus
+class GamePak_SRAM_Bus : public Bus<uint8_t>
 {
 public:
     uint8_t bitfield;

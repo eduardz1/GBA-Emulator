@@ -1,9 +1,12 @@
 #include "headers/master.hh"
 #include "headers/bus.hh"
-#include <memory>
+#include <memory.h>
+#include <stdint.h>
+#include <iostream>
 
 int main()
 {
+    /*
     std::unique_ptr<BIOS_ROM_Bus> b01(new BIOS_ROM_Bus);
     std::unique_ptr<WRAM32K_Bus> b02(new WRAM32K_Bus);
     std::unique_ptr<IO_Bus> b03(new IO_Bus);
@@ -14,7 +17,8 @@ int main()
     std::unique_ptr<GamePak_ROM_Bus> b06(new GamePak_ROM_Bus);
     std::unique_ptr<GamePak_Flash_Bus> b06(new GamePak_Flash_Bus);
     std::unique_ptr<GamePak_SRAM_Bus> b06(new GamePak_SRAM_Bus);
-    bus_init();
+    */
     WRAM256K_Bus<uint16_t> piedi;
-    piedi.
+    piedi.bitfield = 7;
+    std::cout << piedi.read() << std::endl;
 }
