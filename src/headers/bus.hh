@@ -5,114 +5,33 @@
 #include <stdio.h>
 #include <iostream>
 
-template <typename T>//T is the bit width of the bus
-class Bus
+template <typename T> // T is the bit width of the bus
+struct bus_t
 {   
-public:
-    T bitfield;   
-    int read();
+    T bitfield;
+    char r_perm : 3; // 8/16/32 bit read
+    char w_perm : 3; // 8/16/32 bit read
+    T (*read_ptr)(struct bus_t<T>, int size);
+    void (*write_ptr)(struct bus_t<T>, int size, T data);
 };
 
 template <typename T>
-class BIOS_ROM_Bus : public Bus<uint32_t>
-{
-public:
-    uint32_t bitfield;
-    
-    BIOS_ROM_Bus();
-    ~BIOS_ROM_Bus();
-};
+T read(struct bus_t<T>, int size); 
 
 template <typename T>
-class WRAM32K_Bus : public  Bus<uint32_t>
+void write(struct bus_t<T>, int size, T data);
+
+
+class Bus
 {
+private:
+
 public:
-    uint32_t bitfield;
-    WRAM32K_Bus();
-    ~WRAM32K_Bus();
+    struct bus_t<uint32_t> BIOS_ROM;
+    Bus();
+    ~Bus();
 };
 
-template <typename T>
-class IO_Bus : public Bus<uint32_t>
-{
-public:
-    uint32_t bitfield;
-    IO_Bus();
-    ~IO_Bus();
-};
-
-template <typename T>
-class OAM_Bus : public Bus<uint32_t>
-{
-public:
-    uint32_t bitfield;
-    OAM_Bus();
-    ~OAM_Bus();
-};
-
-template <typename T>
-class WRAM256K_Bus : public Bus<uint16_t>
-{
-public:
-    uint16_t bitfield; 
-    WRAM256K_Bus(){};
-    ~WRAM256K_Bus(){};
-    // int Bus<uint16_t>::read();
-};
-
-template <typename T>
-class PRAM_Bus : public Bus<uint16_t>
-{
-public:
-    uint16_t bitfield;
-    PRAM_Bus();
-    ~PRAM_Bus();
-};
-
-template <typename T>
-class VRAM_Bus : public Bus<uint16_t>
-{
-public:
-    uint16_t bitfield;
-    VRAM_Bus();
-    ~VRAM_Bus();
-};
-
-template <typename T>
-class GamePak_ROM_Bus : public Bus<uint16_t>
-{
-public:
-    uint16_t bitfield;
-    GamePak_ROM_Bus();
-    ~GamePak_ROM_Bus();
-};
-
-template <typename T>
-class GamePak_Flash_Bus : public Bus<uint16_t>
-{
-public:
-    uint16_t bitfield;
-    GamePak_Flash_Bus();
-    ~GamePak_Flash_Bus();
-};
-
-template <typename T>
-class GamePak_SRAM_Bus : public Bus<uint8_t>
-{
-public:
-    uint8_t bitfield;
-    GamePak_SRAM_Bus();
-    ~GamePak_SRAM_Bus();
-};
-
-
-template <typename T>
-int Bus<T>::read()
-{
-    //std::cout << "culo" << std::endl;
-    printf("culo\n");
-    return this->bitfield;
-}
 
 #endif /* !BUS_H */
     

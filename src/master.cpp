@@ -6,6 +6,7 @@
 
 int main()
 {
+    int size = 4;
     /*
     std::unique_ptr<BIOS_ROM_Bus> b01(new BIOS_ROM_Bus);
     std::unique_ptr<WRAM32K_Bus> b02(new WRAM32K_Bus);
@@ -18,7 +19,8 @@ int main()
     std::unique_ptr<GamePak_Flash_Bus> b06(new GamePak_Flash_Bus);
     std::unique_ptr<GamePak_SRAM_Bus> b06(new GamePak_SRAM_Bus);
     */
-    WRAM256K_Bus<uint16_t> piedi;
-    piedi.bitfield = 7;
-    printf("%d\n", piedi.read()); // << std::endl;
+    Bus piedi;
+    piedi.BIOS_ROM.bitfield = 534; // 10 0001 0110
+    printf("%d\n", piedi.BIOS_ROM.bitfield); // 534;
+    printf("%d\n", piedi.BIOS_ROM.read_ptr(piedi.BIOS_ROM, size)); // dovrebbe tornare 2
 }
