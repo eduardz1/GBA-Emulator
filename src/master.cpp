@@ -14,4 +14,7 @@ int main()
     std::unique_ptr<GamePak_ROM_Bus> b06(new GamePak_ROM_Bus);
     std::unique_ptr<GamePak_Flash_Bus> b06(new GamePak_Flash_Bus);
     std::unique_ptr<GamePak_SRAM_Bus> b06(new GamePak_SRAM_Bus);
+    bus_init();
+    WRAM256K_Bus<uint16_t> piedi;
+    piedi.
 }
