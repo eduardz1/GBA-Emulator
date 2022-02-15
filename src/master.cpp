@@ -19,8 +19,13 @@ int main()
     std::unique_ptr<GamePak_Flash_Bus> b06(new GamePak_Flash_Bus);
     std::unique_ptr<GamePak_SRAM_Bus> b06(new GamePak_SRAM_Bus);
     */
-    Bus piedi;
-    piedi.BIOS_ROM.bitfield = 534; // 10 0001 0110
-    printf("%d\n", piedi.BIOS_ROM.bitfield); // 534;
-    printf("%d\n", piedi.BIOS_ROM.read_ptr(piedi.BIOS_ROM, size)); // dovrebbe tornare 2
+    Bus prova;
+    printf("%p\n", (void *)prova.BIOS_ROM.read_ptr);
+    //prova.BIOS_ROM.*read_ptr(prova.BIOS_ROM, size);
+    //prova.BIOS_ROM.bitfield = 534;
+    //int su = (prova.BIOS_ROM.*read_ptr)(prova.BIOS_ROM, size);
+
+    // piedi.lookup[Bus::BIOS_ROM].bitfield = 534; // 10 0001 0110
+    // printf("%d\n", piedi.BIOS_ROM.bitfield); // 534;
+    // printf("%d\n", piedi.BIOS_ROM.read_ptr(piedi.BIOS_ROM, size)); // dovrebbe tornare 2
 }
