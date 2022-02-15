@@ -31,7 +31,7 @@ public:
     uint32_t bitfield;
 };
 
-class OAM : Bus
+class OAM_Bus : Bus
 {
 public:
     uint32_t bitfield;
