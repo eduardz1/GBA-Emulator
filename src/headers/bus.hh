@@ -8,11 +8,14 @@ template <typename T>//T is the bit width of the bus
 class Bus
 {   
 public:
-    T bitfield;   
-    int read();
+    int  bitfield;
+    
+    virtual int read(Bus address){
+        return address.bitfield;
+};
 };
 
-template <typename T>
+template <typename uint32_t>
 class BIOS_ROM_Bus : public Bus<uint32_t>
 {
 public:
@@ -49,14 +52,13 @@ public:
     ~OAM_Bus();
 };
 
-template <typename T>
+//template <typename uint16_t>
 class WRAM256K_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
     WRAM256K_Bus() {}
     ~WRAM256K_Bus(){}
-    //int Bus<uint16_t>::read();
 };
 
 template <typename T>
