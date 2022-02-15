@@ -4,4 +4,6 @@
 int main()
 {
     bus_init();
+    WRAM256K_Bus<uint16_t> piedi;
+    piedi.
 }

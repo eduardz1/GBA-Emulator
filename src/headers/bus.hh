@@ -3,74 +3,108 @@
 
 #include <stdint.h>
 
+template <typename T>//T is the bit width of the bus
 class Bus
 {
+    
 public:
+    T bitfield;
     virtual void f() = 0; // dumb code
+    
+    int read(Bus* address,int flag);
 };
 
-class BIOS_ROM_Bus : Bus
+template <typename T>
+class BIOS_ROM_Bus : public Bus
 {
 public:
     uint32_t bitfield;
-    void f()
-    {
-        return;
-    }
+    
+    BIOS_ROM_Bus();
+    ~BIOS_ROM_Bus();
 };
 
-class WRAM32K_Bus : Bus
+template <typename T>
+class WRAM32K_Bus : public  Bus
 {
 public:
     uint32_t bitfield;
+    WRAM32K_Bus();
+    ~WRAM32K_Bus();
 };
 
-class IO_Bus : Bus
+template <typename T>
+class IO_Bus : public Bus
 {
 public:
     uint32_t bitfield;
+    IO_Bus();
+    ~IO_Bus();
 };
 
-class OAM : Bus
+template <typename T>
+class OAM : public Bus
 {
 public:
     uint32_t bitfield;
+    OAM();
+    ~OAM();
 };
 
-class WRAM256K_Bus : Bus
+template <typename T>
+class WRAM256K_Bus : public Bus
 {
 public:
     uint16_t bitfield;
+    int Bus::read(WRAM256K_Bus* address,int flag);
+    WRAM256K_Bus();
+    ~WRAM256K_Bus();
 };
 
-class PRAM_Bus : Bus
+template <typename T>
+class PRAM_Bus : public Bus
 {
 public:
     uint16_t bitfield;
+    PRAM_Bus();
+    ~PRAM_Bus();
 };
 
-class VRAM_Bus : Bus
+template <typename T>
+class VRAM_Bus : public Bus
 {
 public:
     uint16_t bitfield;
+    VRAM_Bus();
+    ~VRAM_Bus();
 };
 
-class GamePak_ROM_Bus : Bus
+template <typename T>
+class GamePak_ROM_Bus : public Bus
 {
 public:
     uint16_t bitfield;
+    GamePak_ROM_Bus();
+    ~GamePak_ROM_Bus();
 };
 
-class GamePak_Flash_Bus : Bus
+template <typename T>
+class GamePak_Flash_Bus : public Bus
 {
 public:
     uint16_t bitfield;
+    GamePak_Flash_Bus();
+    ~GamePak_Flash_Bus();
 };
 
-class GamePak_SRAM_Bus : Bus
+template <typename T>
+class GamePak_SRAM_Bus : public Bus
 {
 public:
     uint8_t bitfield;
+    GamePak_SRAM_Bus();
+    ~GamePak_SRAM_Bus();
 };
 
 #endif /* !BUS_H */
+    
