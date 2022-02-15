@@ -6,13 +6,10 @@
 
 template <typename T>//T is the bit width of the bus
 class Bus
-{
-    
+{   
 public:
-    T bitfield;
-    virtual void f() = 0; // dumb code
-    
-    int read(Bus* address,int flag);
+    T bitfield;   
+    int read();
 };
 
 template <typename T>
@@ -44,12 +41,12 @@ public:
 };
 
 template <typename T>
-class OAM : public Bus<uint32_t>
+class OAM_Bus : public Bus<uint32_t>
 {
 public:
     uint32_t bitfield;
-    OAM();
-    ~OAM();
+    OAM_Bus();
+    ~OAM_Bus();
 };
 
 template <typename T>
@@ -57,11 +54,9 @@ class WRAM256K_Bus : public Bus<uint16_t>
 {
 public:
     uint16_t bitfield;
-    WRAM256K_Bus();
-    void f(){
-        printf("belle palle \n");
-    }
-    ~WRAM256K_Bus();
+    WRAM256K_Bus() {}
+    ~WRAM256K_Bus(){}
+    //int Bus<uint16_t>::read();
 };
 
 template <typename T>
