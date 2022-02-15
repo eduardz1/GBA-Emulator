@@ -2,6 +2,8 @@
 #define BUS_H
 
 #include <stdint.h>
+#include <stdio.h>
+#include <iostream>
 
 template <typename T>//T is the bit width of the bus
 class Bus
@@ -52,10 +54,10 @@ template <typename T>
 class WRAM256K_Bus : public Bus<uint16_t>
 {
 public:
-    uint16_t bitfield;
-    WRAM256K_Bus() {}
-    ~WRAM256K_Bus(){}
-    //int Bus<uint16_t>::read();
+    uint16_t bitfield; 
+    WRAM256K_Bus(){};
+    ~WRAM256K_Bus(){};
+    // int Bus<uint16_t>::read();
 };
 
 template <typename T>
@@ -103,5 +105,17 @@ public:
     ~GamePak_SRAM_Bus();
 };
 
+
+template <typename T>
+int Bus<T>::read()
+{
+    //std::cout << "culo" << std::endl;
+    printf("culo\n");
+    return this->bitfield;
+}
+
 #endif /* !BUS_H */
     
+
+
+

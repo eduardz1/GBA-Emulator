@@ -20,5 +20,5 @@ int main()
     */
     WRAM256K_Bus<uint16_t> piedi;
     piedi.bitfield = 7;
-    std::cout << piedi.read() << std::endl;
+    printf("%d\n", piedi.read()); // << std::endl;
 }
