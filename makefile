@@ -1,11 +1,12 @@
 CC=g++
-CFLAGS=-g -O0
+CFLAGS=
 
 # Dependencies
-OBJS=bus.o memory.o master.o arm7tdmi.o
+OBJS=master.o arm7tdmi.o bus.o
 
 all: $(OBJS)
-	$(CC) *.o -o master
+	$(CC) $(CFLAGS) *.o -o master
+
 %.o: src/%.cpp
 	$(CC) -c $(CFLAGS) src/*.cpp
 
