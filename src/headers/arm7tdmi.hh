@@ -9,7 +9,7 @@ private:
     {
         ARM_MODE,
         THUMB_MODE
-    } mode;
+    };
 
     enum _registers
     {
@@ -20,11 +20,11 @@ private:
 
         R14, R14_fiq, R14_svc, R14_abt, R14_irq, R14_und, // Link Register
 
-        R15,     // Program Counter
+        R15, // Program Counter
 
         CPSR, SPSR_fiq, SPSR_svc, SPSR_abt, SPSR_irq, SPSR_und, // Program Status Registers
         
-        NUM       // Number of Registers
+        NUM // Number of Registers
     };
 
     std::array<uint32_t, NUM> registers;
@@ -33,24 +33,12 @@ public:
     arm7tdmi();
     ~arm7tdmi();
 
-    /*Setting the CPU MODE
-    ARM_MODE: 32-bit mode
-    THUMB_MODE: 16-bit mode
-    If given a non-existent mode, switching to default mode(THUMB_MODE)
-    */
-    void set_mode(enum _mode mode)
-    {
-        if (mode != ARM_MODE && mode != THUMB_MODE)
-        {
-            this->mode = THUMB_MODE;
-        }
-        this->mode = mode;
-    }
+    // set CPU mode with a change in register 15
+    void set_mode(enum _mode mode);
 
-    enum _mode get_mode()
-    {
-        return this->mode;
-    }
+    // when would we use get_mode if not for debugging? I think that it would
+    // make sense for it to return the string with the mode
+    std::string get_mode();
 };
 
 #endif /* !ARM7TDMI_H */
