@@ -8,12 +8,11 @@
 int main()
 {
     int size = 32;
-    uint32_t write_try=98989898;
-    int checks=17000;
+    uint32_t write_try = 98989898;
+    int checks = 17000;
     Bus prova;
-    (prova.*prova.BIOS_ROM.write_ptr)(prova.BIOS_ROM,size,write_try);
-    std::cout<<"----------------------------------------------"<<std::endl;
+    (prova.*prova.BIOS_ROM.write_ptr)(prova.BIOS_ROM, size, write_try);
+    std::cout << "----------------------------------------------" << std::endl;
     uint32_t su = (prova.*prova.BIOS_ROM.read_ptr)(prova.BIOS_ROM, size);
-    std::cout<<"Valore:"<<(uint)su<<std::endl;
-   
+    std::cout << "Valore:" << (uint)su << std::endl;
 }

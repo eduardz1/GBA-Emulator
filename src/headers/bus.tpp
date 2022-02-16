@@ -1,74 +1,71 @@
 #pragma once
+
 template <typename T>
-T Bus::read(struct bus_t<T> bus, int size)
+T Bus::read(struct _bus<T> bus, int bit_length)
 {
-    T tmp=0;
-    switch(size){
-        //size 8 bit: I read the first byte
-        case 8:
-            tmp=RAM[bus.bitfield];
-            break;
-        //size 16 bit: I read the first two bytes
-        case 16:
-            tmp=RAM[bus.bitfield+1];
-            tmp|=RAM[bus.bitfield]<<8;
-            break;
-        //size 32 bit: I read the first four bytes
-        case 32:
-            tmp=RAM[bus.bitfield+3];
-            tmp|=RAM[bus.bitfield+2]<<8;
-            tmp|=RAM[bus.bitfield+1]<<16;
-            tmp|=RAM[bus.bitfield]<<24;   
-            break;
-    
-        default:
-            printf("Trying to read from a bus with incorrect width\n");
+    T tmp = 0;
+
+    switch (bit_length)
+    {
+    case 8: // reading 1 byte
+        tmp = RAM[bus.bitfield];
+        break;
+
+    case 16: // writing 2 bytes
+        tmp  = RAM[bus.bitfield + 1];
+        tmp |= RAM[bus.bitfield] << 8;
+        break;
+
+    case 32: // reading 4 bytes
+        tmp  = RAM[bus.bitfield + 3];
+        tmp |= RAM[bus.bitfield + 2] << 8;
+        tmp |= RAM[bus.bitfield + 1] << 16;
+        tmp |= RAM[bus.bitfield]     << 24;
+        break;
+
+    default:
+        // ERROR
+        break;
     }
     printf("Bus.bitfield is %d\n", bus.bitfield);
-    printf("Size is %d\n", size);
+    printf("Size is %d\n", bit_length);
     return tmp;
 }
-/*template uint32_t Bus::read(struct bus_t<uint32_t> bus, int size);
-template uint16_t Bus::read(struct bus_t<uint16_t> bus, int size);
-template uint8_t Bus::read(struct bus_t<uint8_t> bus, int size);
-*/
+
 template <typename T>
-void Bus::write(struct bus_t<T> bus, int size, T data)
+void Bus::write(struct _bus<T> bus, int bit_length, T data)
 {
-    T tmp=0;
+    switch (bit_length)
+    {  
+    case 8: // writing 1 byte
+        RAM[bus.bitfield] = data;
+        break;
 
-    switch(size){
-        //size 8 bit: writing 1 byte
-        case 8:
-            RAM[bus.bitfield]=data;
-            break;
+    case 16: // writing 2 bytes
+        RAM[bus.bitfield + 1] = (data & 0x00FF);
+        RAM[bus.bitfield]     = (data & 0xFF00) >> 8;
+        break;
 
-        //size 16 bit: writing 2 byte
-        case 16:
-            RAM[bus.bitfield+1]=data & 0xFF;
-            RAM[bus.bitfield]=(data & 0xFF00)>>8;
-            break;
+    case 32: // writing 4 bytes
+        std::cout << "Dato da inserire:" << data << std::endl;
 
-        //size 32 bit: writing 4 bytes
-        case 32:
-            std::cout<<"Dato da inserire:"<<data<<std::endl;
+        RAM[bus.bitfield + 3] = (data & 0x000000FF);
+        RAM[bus.bitfield + 2] = (data & 0x0000FF00) >> 8;
+        RAM[bus.bitfield + 1] = (data & 0x00FF0000) >> 16;
+        RAM[bus.bitfield]     = (data & 0xFF000000) >> 24;
+        break;
 
-            RAM[bus.bitfield+3]=(data & 0xFF);
-            RAM[bus.bitfield+2]=(data & 0xFF00)>>8;
-            RAM[bus.bitfield+1]=(data & 0xFF0000)>>16;
-            RAM[bus.bitfield]=(data & 0xFF000000)>>24;
-                    break;
+    default:
+        // ERROR
+        break; 
     }
 }
-/*template void Bus::write(struct bus_t<uint32_t> bus, int size, uint32_t data);
-template void Bus::write(struct bus_t<uint16_t> bus, int size, uint16_t data);
-template void Bus::write(struct bus_t<uint8_t> bus, int size, uint8_t data);
-*/
+
 template <typename T>
-    bool Bus::check_constraint(struct bus_t<T> bus, uint32_t address){
-        if(address >= bus.min_range && address <= bus.max_range){
-            return true;
-        }
-        else 
-            return false;
-    }
+bool Bus::check_constraint(struct _bus<T> bus, uint32_t address)
+{
+    if (address >= bus.min_range && address <= bus.max_range)
+        return true;
+    else
+        return false;
+}

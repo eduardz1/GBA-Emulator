@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=
 
 # Dependencies
-OBJS= memory.o master.o arm7tdmi.o
+OBJS=master.o arm7tdmi.o bus.o
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) *.o -o master
