@@ -27,8 +27,7 @@ T Bus::read(struct _bus<T> bus, int bit_length)
         // ERROR
         break;
     }
-    printf("Bus.bitfield is %d\n", bus.bitfield);
-    printf("Size is %d\n", bit_length);
+ 
     return tmp;
 }
 

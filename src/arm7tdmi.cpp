@@ -1,28 +1,55 @@
 #include "headers/arm7tdmi.hh"
 
-std::string arm7tdmi::get_mode()
+using namespace cpu;
+Arm7tdmi::Arm7tdmi(){
+    registers[CPSR].word=2882112257;
+   /* printf("M0:%u\n",registers[CPSR].M0 & 0x1);
+    printf("M1:%u\n",registers[CPSR].M1 & 0x1);
+    printf("M2:%u\n",registers[CPSR].M2 & 0x1);
+    printf("M3:%u\n",registers[CPSR].M3 & 0x1);
+    printf("N:%u\n",registers[CPSR].N &0x1);*/
+    registers[CPSR].M0=0;
+    std::cout<<"After cambio"<<(uint)registers[CPSR].word<<std::endl;
+}
+ Arm7tdmi::~Arm7tdmi(){
+ }
+
+std::string Arm7tdmi::get_mode()
 {
     // 0x00000003 & R[15] == 0 -> ARM_MODE
     // 0x00000003 & R[15] == 2 -> THUMB_MODE
-    return registers[R15] & 0x00000003 ? "THUMB_MODE" : "ARM_MODE";
+    return registers[R15].word & 0x00000003 ? "THUMB_MODE" : "ARM_MODE";
 }
 
-void arm7tdmi::set_mode(enum _mode mode)
+void Arm7tdmi::set_mode(enum _mode mode)
 {
     // in ARM state bits [1:0] of R15 are 0 and bits [31:2] contain te PC
     // in THUMB state bit [0] of R15 is 0 and bits [31:1] contain the PC
     switch (mode)
     {
     case ARM_MODE:
-        registers[R15] &= 0xFFFFFFFC;
+        registers[R15].word &= 0xFFFFFFFC;
         break;
 
     case THUMB_MODE:
-        registers[R15] &= 0xFFFFFFFE;
+        registers[R15].word &= 0xFFFFFFFE;
         break;
 
     default:
         // ERROR
         break;
     }
+}
+
+uint32_t Arm7tdmi::fetch(Bus bus_controller){
+        return bus_controller.RAM[R15];
+}
+
+ Arm7tdmi::_instruction Arm7tdmi::decode(Arm7tdmi::_instruction instruction){
+    struct _instruction tmp;
+    return tmp;
+}
+
+void Arm7tdmi::execute(Arm7tdmi::_instruction instruction){
+    /*Esegui il codice*/
 }
