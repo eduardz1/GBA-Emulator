@@ -33,6 +33,8 @@ public:
     template <typename T>
     bool check_constraint(struct _bus<T> bus, uint address);
 
+    void init_bios_ram(FILE* bios_stream);
+
 public:
     struct _bus<uint32_t> BIOS_ROM;
     struct _bus<uint32_t> WRAM_32K;
@@ -46,6 +48,7 @@ public:
     struct _bus<uint8_t>  GamePak_SRAM;
 
     //RAM of 4 MB = 2^32 = width of the bus
+    /*TODO: fix the size*/
     std::array<uint8_t, 4*1024*1024> RAM;
 
 public:

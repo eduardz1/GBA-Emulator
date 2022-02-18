@@ -11,7 +11,7 @@ all: $(OBJS)
 	$(CC) -c $(CFLAGS) src/*.cpp
 
 clean:
-	rm -f *.o master users nodes log.txt ledger.txt *~
+	rm -f *.o master *.dump log.txt  *~
 
 run: all
 	./master

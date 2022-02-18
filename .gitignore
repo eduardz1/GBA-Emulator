@@ -32,6 +32,12 @@
 *.app
 master
 
+#Dump files
+*.dump
 
 # .vscode
 /.vscode
+
+#BIOS & ROMS
+gba_bios.bin
+*.gba

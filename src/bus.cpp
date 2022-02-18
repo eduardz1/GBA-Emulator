@@ -25,3 +25,14 @@ Bus::Bus()
 Bus::~Bus()
 {
 }
+/*Writing the BIOS into the RAM,byte per byte*/
+void Bus::init_bios_ram(FILE* bios_stream){
+    FILE* debug_dump=fopen("hex_bios.dump","a+");
+    for(int i=Bus::BIOS_ROM.min_range;i<Bus::BIOS_ROM.max_range;i++){
+        if(fread(&Bus::RAM[i],1,1,bios_stream) == -1){
+            /*TODO: Error Handling*/
+            printf("FAILING AT READING THE %dTH BYTE OF THE BIOS ROM\n",i);
+        }
+        fprintf(debug_dump,"%02X ",RAM[i]);
+    }
+}
