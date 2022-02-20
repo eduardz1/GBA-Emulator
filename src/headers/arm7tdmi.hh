@@ -72,6 +72,11 @@ private:
         SOFTWARE_INTERRUPT
     };
 
+    /*bit-mask for every type of instruction. They will be used to decode instructions*/
+    struct _instruction_masks{
+    };
+
+
     struct _instruction{
         enum _instruction_type type;
         uint32_t instruction;
