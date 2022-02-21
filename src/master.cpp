@@ -19,4 +19,14 @@ int main()
     std::cout << "----------------------------------------------" << std::endl;
     uint32_t su = (prova.*prova.BIOS_ROM.read_ptr)(prova.BIOS_ROM, size);
     std::cout << "Valore:" << (uint)su << std::endl;
+
+    for(int i=prova.BIOS_ROM.min_range;i<prova.BIOS_ROM.max_range;i = i+4){
+        cpu::Arm7tdmi::_instruction tmp;
+        tmp.word  = prova.RAM[i + 3];
+        tmp.word |= prova.RAM[i + 2] << 8;
+        tmp.word |= prova.RAM[i + 1] << 16;
+        tmp.word |= prova.RAM[i]     << 24;
+
+        cpu.decode_execute(tmp, prova);
+    }
 }

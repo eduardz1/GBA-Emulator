@@ -50,9 +50,9 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
 }
 
 void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_controller){
-    union _instruction tmp;
+    union _instruction tmp = instruction;
     uint8_t opcode;
-    tmp.word = fetch(bus_controller);
+    // tmp.word = //fetch(bus_controller);
 
     uint16_t opcode_id = 0;   
     opcode_id |= tmp.opcode_id2;
@@ -65,8 +65,11 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_contro
     if((opcode_id >> 9 == 3) && ((opcode_id & 1) == 1))
         undefined_handler(); // undefined instruction
 
-    if(tmp.opcode_id2>>6 == 0){//bit 26-27 unset
-        if(tmp.opcode_id2 ^ 32 == 0 || !(tmp.opcode_id1 & 1 == 0) || !(tmp.opcode_id1 & 8 == 0)){//bit 25 set or bit 4 unset  or bit 7 unset
+    switch(tmp.opcode_id2>>6)
+    {  
+    case 0x0: // bit 26-27 unset
+        {
+        if(tmp.opcode_id2 & 32 == 0 || !(tmp.opcode_id1 & 1 == 0) || !(tmp.opcode_id1 & 8 == 0)){//bit 25 set or bit 4 unset  or bit 7 unset
             switch(opcode){
                 case 0x0:AND(instruction.word); break;
                 case 0x1:EOR(instruction.word); break;
@@ -91,7 +94,6 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_contro
                 case 0x9:{
                     if(tmp.opcode_id2 & 1){// bit 20 set(S flag == 1)
                         TEQ(instruction.word);
-
                     }else{//bit 20 unset(S flag == 0)
                         if(tmp.opcode_id2 & 32 == 0){//bit 25 set(I flag == 1)
                             if((tmp.word>>12)&15==15){//bit[12:15] set
@@ -175,39 +177,97 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_contro
                     break;
                 }
             }
+            return;
         }
-    }
-    switch(tmp.opcode_id1)
-    {
-    case 0x1:
-        switch(tmp.opcode_id2)
+
+        switch(tmp.opcode_id1)
         {
-            case 0x12: BX(instruction.word); break;
-        }
+        case 0x9:
+            switch(tmp.opcode_id2)
+            {   
+                // Multiply
+                case 0x0: case 0x1: MUL(instruction.word); break;
+                case 0x2: case 0x3: MLA(instruction.word); break;
+                // Multiply Long
+                case 0x8: case 0x9: UMULL(instruction.word); break;
+                case 0xA: case 0xB: UMLAL(instruction.word); break;
+                case 0xC: case 0xD: SMULL(instruction.word); break;
+                case 0xE: case 0xF: SMLAL(instruction.word); break;
+                // Single Data Swap
+                case 0x10: SWP(instruction.word); break;
+                case 0x14: SWPB(instruction.word); break;
 
-    case 0x9:
-        switch(tmp.opcode_id2)
+                default:
+                // Halfword Data Transfer: register/immediate
+                // Single Data Transfer
+                // Block Data Transfer
+                // Branch
+                // Coprocessor Data Transfer
+                // Coprocessor Register Transfer
+                // Software Interrupt
+                break;
+            }
+            break;
+
+        case 0xB:
+            if(tmp.opcode_id2 & 1 == 1)
+                LDRH(instruction.word);
+            else
+                STRH(instruction.word);
+            break;
+
+        case 0xD:
+            if(tmp.opcode_id2 & 1 == 1)
+                LDRSB(instruction.word);
+            else
+                undefined_handler();
+            break;
+
+        case 0xF:
+            if(tmp.opcode_id2 & 1 == 1)
+                LDRSH(instruction.word);
+            else
+                undefined_handler();
+            break;
+        }
+        }
+        break;
+
+    case 0x1:
+        {
+            if(tmp.opcode_id2 & 1 == 1)
+            {
+                if(tmp.opcode_id2 & 4 == 1) LDRB(instruction.word);
+                else LDR(instruction.word);
+            }
+            else
+            {
+                if(tmp.opcode_id2 & 4 == 1) STRB(instruction.word);
+                else STR(instruction.word);
+            }
+
+        }
+        break;
+
+    case 0x2:
         {   
-            // Multiply
-            case 0x0: case 0x1: MUL(instruction.word); break;
-            case 0x2: case 0x3: MLA(instruction.word); break;
-            // Multiply Long
-            case 0x8: case 0x9: UMULL(instruction.word); break;
-            case 0xA: case 0xB: UMLAL(instruction.word); break;
-            case 0xC: case 0xD: SMULL(instruction.word); break;
-            case 0xE: case 0xF: SMLAL(instruction.word); break;
-            // Single Data Swap
-            case 0x10: SWP(instruction.word); break;
-            case 0x14: SWPB(instruction.word); break;
-
-            default:
-            // Halfword Data Transfer: register/immediate
-            // Single Data Transfer
-            // Block Data Transfer
-            // Branch
-            // Coprocessor Data Transfer
-            // Coprocessor Register Transfer
-            // Software Interrupt
+            if(tmp.opcode_id2 & 0x20 == 1)
+            {
+                B(instruction.word);
+            }
+            else
+            {
+                if(tmp.opcode_id2 & 1 == 1) LDM(instruction.word);
+                else STM(instruction.word);
+            }
         }
+        break;
+
+    case 0x3:
+        {   
+            if(tmp.opcode_id2 & 0x30) SWI(instruction.word);
+            else undefined_handler();
+        }
+        break;
     }
 }

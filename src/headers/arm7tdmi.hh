@@ -8,7 +8,7 @@ namespace cpu
 { 
 class Arm7tdmi
 {
-private:
+public: // should be made private
 
     enum _mode
     {
@@ -110,46 +110,46 @@ public:
     std::string get_mode();
 
 public:
-    void undefined_handler(); // ERROR
-    void ADC(uint32_t instruction);
-    void ADD(uint32_t instruction);
-    void AND(uint32_t instruction);
-    void B(uint32_t instruction);
-    void BIC(uint32_t instruction);
-    void BX(uint32_t instruction);
-    void CMN(uint32_t instruction);
-    void CMP(uint32_t instruction);
-    void EOR(uint32_t instruction);
-    void LDM(uint32_t instruction);
-    void LDR(uint32_t instruction);
-    void LDRB(uint32_t instruction);
-    void LDRH(uint32_t instruction);
-    void LDRSB(uint32_t instruction);
-    void LDRSH(uint32_t instruction);
-    void MLA(uint32_t instruction);
-    void MOV(uint32_t instruction);
-    void MRS(uint32_t instruction);
-    void MSR(uint32_t instruction);
-    void MUL(uint32_t instruction);
-    void MVN(uint32_t instruction);
-    void ORR(uint32_t instruction);
-    void RSB(uint32_t instruction);
-    void RSC(uint32_t instruction);
-    void SBC(uint32_t instruction);
-    void SMLAL(uint32_t instruction);
-    void SMULL(uint32_t instruction);
-    void STM(uint32_t instruction);
-    void STR(uint32_t instruction);
-    void STRB(uint32_t instruction);
-    void STRH(uint32_t instruction);
-    void SUB(uint32_t instruction);
-    void SWI(uint32_t instruction);
-    void SWP(uint32_t instruction);
-    void SWPB(uint32_t instruction);
-    void TEQ(uint32_t instruction);
-    void TST(uint32_t instruction);
-    void UMLAL(uint32_t instruction);
-    void UMULL(uint32_t instruction);
+    void undefined_handler() { std::cout << "undef" << std::endl; } // ERROR
+    void ADC(uint32_t instruction) { std::cout << "ADC" << std::endl; }
+    void ADD(uint32_t instruction) { std::cout << "ADD" << std::endl; }
+    void AND(uint32_t instruction) { std::cout << "AND" << std::endl; }
+    void B(uint32_t instruction) { std::cout << "B" << std::endl; }
+    void BIC(uint32_t instruction) { std::cout << "BIC" << std::endl; }
+    void BX(uint32_t instruction) { std::cout << "BX" << std::endl; }
+    void CMN(uint32_t instruction) { std::cout << "CMN" << std::endl; }
+    void CMP(uint32_t instruction) { std::cout << "CMP" << std::endl; }
+    void EOR(uint32_t instruction) { std::cout << "EOR" << std::endl; }
+    void LDM(uint32_t instruction) { std::cout << "LDM" << std::endl; }
+    void LDR(uint32_t instruction) { std::cout << "LDR" << std::endl; }
+    void LDRB(uint32_t instruction) { std::cout << "LDRB" << std::endl; }
+    void LDRH(uint32_t instruction) { std::cout << "LDRH" << std::endl; }
+    void LDRSB(uint32_t instruction) { std::cout << "LDRSB" << std::endl; }
+    void LDRSH(uint32_t instruction) { std::cout << "LDRSH" << std::endl; }
+    void MLA(uint32_t instruction) { std::cout << "MLA" << std::endl; }
+    void MOV(uint32_t instruction) { std::cout << "MOV" << std::endl; }
+    void MRS(uint32_t instruction) { std::cout << "MRS" << std::endl; }
+    void MSR(uint32_t instruction) { std::cout << "MSR" << std::endl; }
+    void MUL(uint32_t instruction) { std::cout << "MUL" << std::endl; }
+    void MVN(uint32_t instruction) { std::cout << "MVN" << std::endl; }
+    void ORR(uint32_t instruction) { std::cout << "ORR" << std::endl; }
+    void RSB(uint32_t instruction) { std::cout << "RSB" << std::endl; }
+    void RSC(uint32_t instruction) { std::cout << "RSC" << std::endl; }
+    void SBC(uint32_t instruction) { std::cout << "SBC" << std::endl; }
+    void SMLAL(uint32_t instruction) { std::cout << "SMLAL" << std::endl; }
+    void SMULL(uint32_t instruction) { std::cout << "SMULL" << std::endl; }
+    void STM(uint32_t instruction) { std::cout << "STM" << std::endl; }
+    void STR(uint32_t instruction) { std::cout << "STR" << std::endl; }
+    void STRB(uint32_t instruction) { std::cout << "STRB" << std::endl; }
+    void STRH(uint32_t instruction) { std::cout << "STRH" << std::endl; }
+    void SUB(uint32_t instruction) { std::cout << "SUB" << std::endl; }
+    void SWI(uint32_t instruction) { std::cout << "SWI" << std::endl; }
+    void SWP(uint32_t instruction) { std::cout << "SWP" << std::endl; }
+    void SWPB(uint32_t instruction) { std::cout << "SWPB" << std::endl; }
+    void TEQ(uint32_t instruction) { std::cout << "TEQ" << std::endl; }
+    void TST(uint32_t instruction) { std::cout << "TST" << std::endl; }
+    void UMLAL(uint32_t instruction) { std::cout << "UMLAL" << std::endl; }
+    void UMULL(uint32_t instruction) { std::cout << "UMULL" << std::endl; }
 };
 }
 #endif /* !ARM7TDMI_H */

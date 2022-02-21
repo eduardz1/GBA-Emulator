@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=
+CFLAGS=-g -O0
 
 # Dependencies
 OBJS=master.o arm7tdmi.o bus.o
