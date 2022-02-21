@@ -64,10 +64,31 @@ void Arm7tdmi::decode(Arm7tdmi::_instruction instruction, Bus bus_controller){
 
     switch(opcode_id)
     {
-    case 0: //wip
-    // and
-    case 9: case 25:
-    // mul
+    // MUL without Accumulator
+    case 0x9: case 0x19://bits 20-27th:0x00 or 0x01  bits 4-7th: 0x09 
+        break;
+
+    // MUL with Accumulator -> MLA
+    case 0x29: case 0x39:
+        break;
+
+    // MUL LONG Unsigned without Accumulator -> UMULL
+    case 0x89: case 0x99:
+        break;
+
+    // MUL LONG Unsigned with Accumulator -> UMLAL
+    case 0xA9: case 0xB5:
+        break;
+
+    // MUL LONG Signed without Accumulator -> SMULL
+    case 0xE9: case 0xF9:
+        break;
+
+    // MUL LONG Signed with Accumulator -> SMLAL
+    case 0xC9: case 0xD9:
+        break;
+    
+
     }
 }
 
