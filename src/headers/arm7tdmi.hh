@@ -90,7 +90,7 @@ private:
             uint32_t opcode_id2 : 8;
             uint32_t cond : 4;
         };
-        uint32_t instruction;
+        uint32_t word;
     };
 
 public:
@@ -100,9 +100,8 @@ public:
     /*Fetching next instruction from the bus linked to the RAM*/
     uint32_t fetch(Bus bus_controller);
     /*Decoding the instruction to be executed*/
-    void decode( _instruction instruction, Bus bus_controller);
-    /*Executing the instruction*/
-    void execute(_instruction instruction);
+    void decode_execute( _instruction instruction, Bus bus_controller);
+    
     // set CPU mode with a change in register 15
     void set_mode(enum _mode mode);
 

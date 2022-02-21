@@ -49,9 +49,9 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
             return bus_controller.RAM[R15];
 }
 
-void Arm7tdmi::decode(Arm7tdmi::_instruction instruction, Bus bus_controller){
+void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_controller){
     union _instruction tmp;
-    tmp.instruction = fetch(bus_controller);
+    tmp.word = fetch(bus_controller);
 
     uint16_t opcode_id = 0;   
     opcode_id |= tmp.opcode_id2;
@@ -62,36 +62,37 @@ void Arm7tdmi::decode(Arm7tdmi::_instruction instruction, Bus bus_controller){
     if((opcode_id >> 9 == 3) && ((opcode_id & 1) == 1))
         undefined_handler(); // undefined instruction
 
-    switch(opcode_id)
+    switch(tmp.opcode_id1)
     {
-    // MUL without Accumulator
-    case 0x9: case 0x19://bits 20-27th:0x00 or 0x01  bits 4-7th: 0x09 
-        break;
+    case 0x1:
+        switch(tmp.opcode_id2)
+        {
+            case 0x12: BX(instruction.word); break;
+        }
 
-    // MUL with Accumulator -> MLA
-    case 0x29: case 0x39:
-        break;
+    case 0x9:
+        switch(tmp.opcode_id2)
+        {   
+            // Multiply
+            case 0x0: case 0x1: MUL(instruction.word); break;
+            case 0x2: case 0x3: MLA(instruction.word); break;
+            // Multiply Long
+            case 0x8: case 0x9: UMULL(instruction.word); break;
+            case 0xA: case 0xB: UMLAL(instruction.word); break;
+            case 0xC: case 0xD: SMULL(instruction.word); break;
+            case 0xE: case 0xF: SMLAL(instruction.word); break;
+            // Single Data Swap
+            case 0x10: SWP(instruction.word); break;
+            case 0x14: SWPB(instruction.word); break;
 
-    // MUL LONG Unsigned without Accumulator -> UMULL
-    case 0x89: case 0x99:
-        break;
-
-    // MUL LONG Unsigned with Accumulator -> UMLAL
-    case 0xA9: case 0xB5:
-        break;
-
-    // MUL LONG Signed without Accumulator -> SMULL
-    case 0xE9: case 0xF9:
-        break;
-
-    // MUL LONG Signed with Accumulator -> SMLAL
-    case 0xC9: case 0xD9:
-        break;
-    
-
+            default:
+            // Halfword Data Transfer: register/immediate
+            // Single Data Transfer
+            // Block Data Transfer
+            // Branch
+            // Coprocessor Data Transfer
+            // Coprocessor Register Transfer
+            // Software Interrupt
+        }
     }
-}
-
-void Arm7tdmi::execute(Arm7tdmi::_instruction instruction){
-    /*Esegui il codice*/
 }
