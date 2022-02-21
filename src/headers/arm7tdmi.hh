@@ -112,6 +112,45 @@ public:
 
 public:
     void undefined_handler(); // ERROR
+    void ADC(uint32_t instruction);
+    void ADD(uint32_t instruction);
+    void AND(uint32_t instruction);
+    void B(uint32_t instruction);
+    void BIC(uint32_t instruction);
+    void BX(uint32_t instruction);
+    void CMN(uint32_t instruction);
+    void CMP(uint32_t instruction);
+    void EOR(uint32_t instruction);
+    void LDM(uint32_t instruction);
+    void LDR(uint32_t instruction);
+    void LDRB(uint32_t instruction);
+    void LDRH(uint32_t instruction);
+    void LDRSB(uint32_t instruction);
+    void LDRSH(uint32_t instruction);
+    void MLA(uint32_t instruction);
+    void MOV(uint32_t instruction);
+    void MRS(uint32_t instruction);
+    void MSR(uint32_t instruction);
+    void MUL(uint32_t instruction);
+    void MVN(uint32_t instruction);
+    void ORR(uint32_t instruction);
+    void RSB(uint32_t instruction);
+    void RSC(uint32_t instruction);
+    void SBC(uint32_t instruction);
+    void SMLAL(uint32_t instruction);
+    void SMULL(uint32_t instruction);
+    void STM(uint32_t instruction);
+    void STR(uint32_t instruction);
+    void STRB(uint32_t instruction);
+    void STRH(uint32_t instruction);
+    void SUB(uint32_t instruction);
+    void SWI(uint32_t instruction);
+    void SWP(uint32_t instruction);
+    void SWPB(uint32_t instruction);
+    void TEQ(uint32_t instruction);
+    void TST(uint32_t instruction);
+    void UMLAL(uint32_t instruction);
+    void UMULL(uint32_t instruction);
 };
 }
 #endif /* !ARM7TDMI_H */
