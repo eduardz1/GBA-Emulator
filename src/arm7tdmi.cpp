@@ -41,17 +41,34 @@ void Arm7tdmi::set_mode(enum _mode mode)
     }
 }
 
-/*If fetching in THUMB_MODE, I have to read only the lower half*/
+/* If fetching in THUMB_MODE, I have to read only the lower half */
 uint32_t Arm7tdmi::fetch(Bus bus_controller){
         if(get_mode().compare("THUMB_MODE") == 0)
             return bus_controller.RAM[R15] & 0x0000FFFF;
         else 
-            return bus_controller.RAM[15];
+            return bus_controller.RAM[R15];
 }
 
- Arm7tdmi::_instruction Arm7tdmi::decode(Arm7tdmi::_instruction instruction){
-    struct _instruction tmp;
-    return tmp;
+void Arm7tdmi::decode(Arm7tdmi::_instruction instruction, Bus bus_controller){
+    union _instruction tmp;
+    tmp.instruction = fetch(bus_controller);
+
+    uint16_t opcode_id = 0;   
+    opcode_id |= tmp.opcode_id2;
+    opcode_id <<= 4;
+    opcode_id |= tmp.opcode_id1;
+
+    // 011x xxxx xxx1
+    if((opcode_id >> 9 == 3) && ((opcode_id & 1) == 1))
+        undefined_handler(); // undefined instruction
+
+    switch(opcode_id)
+    {
+    case 0: //wip
+    // and
+    case 9: case 25:
+    // mul
+    }
 }
 
 void Arm7tdmi::execute(Arm7tdmi::_instruction instruction){

@@ -32,21 +32,22 @@ private:
 
     //By using the union, we can access single bits fro the uint32_t word parameter by switching to the single bit(i.e. bit)
     union _register
-    { 
-        struct{
-            uint32_t M0:1;//Mode bit 
-            uint32_t M1:1;//Mode bit
-            uint32_t M2:1;//Mode bit
-            uint32_t M3:1;//Mode bit
-            uint32_t M4:1;//Mode bit
-            uint32_t T:1;//State bit 
-            uint32_t F:1;//FIQ Disable 
-            uint32_t I:1;//IRQ Disable 
-            uint32_t R:20;//RESERVED BITS, NOT USEFUL
-            uint32_t V:1;//Overflow FLAG
-            uint32_t C:1;//Carry/Borrow/Extended FLAG
-            uint32_t Z:1;//Zero FLAG
-            uint32_t N:1;//Negative/Less than FLAG
+    {
+        struct
+        {
+            uint32_t M0 : 1; // Mode bit
+            uint32_t M1 : 1; // Mode bit
+            uint32_t M2 : 1; // Mode bit
+            uint32_t M3 : 1; // Mode bit
+            uint32_t M4 : 1; // Mode bit
+            uint32_t T : 1;  // State bit
+            uint32_t F : 1;  // FIQ Disable
+            uint32_t I : 1;  // IRQ Disable
+            uint32_t R : 20; // RESERVED BITS, NOT USEFUL
+            uint32_t V : 1;  // Overflow FLAG
+            uint32_t C : 1;  // Carry/Borrow/Extended FLAG
+            uint32_t Z : 1;  // Zero FLAG
+            uint32_t N : 1;  // Negative/Less than FLAG
         };
         uint32_t word;
     };
@@ -77,8 +78,18 @@ private:
     };
 
 
-    struct _instruction{
-        enum _instruction_type type;
+    union _instruction{
+        // 
+        struct
+        {
+            uint32_t Rm : 4;
+            uint32_t opcode_id1 : 4;
+            uint32_t Rs : 4;
+            uint32_t Rd : 4;
+            uint32_t Rn : 4;
+            uint32_t opcode_id2 : 8;
+            uint32_t cond : 4;
+        };
         uint32_t instruction;
     };
 
@@ -89,7 +100,7 @@ public:
     /*Fetching next instruction from the bus linked to the RAM*/
     uint32_t fetch(Bus bus_controller);
     /*Decoding the instruction to be executed*/
-    _instruction decode( _instruction instruction);
+    void decode( _instruction instruction, Bus bus_controller);
     /*Executing the instruction*/
     void execute(_instruction instruction);
     // set CPU mode with a change in register 15
@@ -99,7 +110,8 @@ public:
     // make sense for it to return the string with the mode
     std::string get_mode();
 
-
+public:
+    void undefined_handler(); // ERROR
 };
 }
 #endif /* !ARM7TDMI_H */
