@@ -105,12 +105,11 @@ public:
     // set CPU mode with a change in register 15
     void set_mode(enum _mode mode);
 
-    // when would we use get_mode if not for debugging? I think that it would
-    // make sense for it to return the string with the mode
-    std::string get_mode();
+    
+    _mode get_mode();
 
 public:
-    void undefined_handler() { std::cout << "undef" << std::endl; } // ERROR
+    void undef(uint32_t instruction) { std::cout << "undef" << std::endl; } // ERROR
     void ADC(uint32_t instruction) { std::cout << "ADC" << std::endl; }
     void ADD(uint32_t instruction) { std::cout << "ADD" << std::endl; }
     void AND(uint32_t instruction) { std::cout << "AND" << std::endl; }
