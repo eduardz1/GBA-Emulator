@@ -49,7 +49,7 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
             return bus_controller.RAM[R15];
 }
 
-void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction, Bus bus_controller){
+void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     union _instruction tmp = instruction;
     uint8_t opcode;
     // tmp.word = //fetch(bus_controller);

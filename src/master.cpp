@@ -27,6 +27,6 @@ int main()
         tmp.word |= prova.RAM[i + 1] << 16;
         tmp.word |= prova.RAM[i]     << 24;
 
-        cpu.decode_execute(tmp, prova);
+        cpu.decode_execute(tmp);
     }
 }

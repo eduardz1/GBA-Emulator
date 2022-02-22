@@ -100,7 +100,7 @@ public:
     /*Fetching next instruction from the bus linked to the RAM*/
     uint32_t fetch(Bus bus_controller);
     /*Decoding the instruction to be executed*/
-    void decode_execute( _instruction instruction, Bus bus_controller);
+    void decode_execute( _instruction instruction);
     
     // set CPU mode with a change in register 15
     void set_mode(enum _mode mode);

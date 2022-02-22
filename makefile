@@ -15,3 +15,6 @@ clean:
 
 run: all
 	./master
+
+rund: all
+	./master > dump.asm
