@@ -4,23 +4,23 @@ template <typename T>
 T Bus::read(struct _bus<T> bus, int bit_length)
 {
     T tmp = 0;
-
+    //18 00 00 EA
     switch (bit_length)
     {
     case 8: // reading 1 byte
         tmp = RAM[bus.bitfield];
         break;
 
-    case 16: // writing 2 bytes
-        tmp  = RAM[bus.bitfield + 1];
-        tmp |= RAM[bus.bitfield] << 8;
+    case 16: // reading 2 bytes in LITTLE ENDIAN
+        tmp  = RAM[bus.bitfield];
+        tmp |= RAM[bus.bitfield + 1] << 8;
         break;
 
-    case 32: // reading 4 bytes
-        tmp  = RAM[bus.bitfield + 3];
-        tmp |= RAM[bus.bitfield + 2] << 8;
-        tmp |= RAM[bus.bitfield + 1] << 16;
-        tmp |= RAM[bus.bitfield]     << 24;
+    case 32: // reading 4 bytes in LITTLE ENDIAN
+        tmp  = RAM[bus.bitfield];
+        tmp |= RAM[bus.bitfield + 1] << 8;
+        tmp |= RAM[bus.bitfield + 2] << 16;
+        tmp |= RAM[bus.bitfield + 3] << 24;
         break;
 
     default:

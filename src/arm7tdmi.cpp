@@ -49,7 +49,7 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     
 
     // Undef when [25:27] -> 011 && [4] set
-    if(tmp.word & 0x0E000010 == 0x06000010)
+    if((tmp.word & 0x0E000010) == 0x06000010)
     {
         undef(instruction.word);
         return;
@@ -59,9 +59,9 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     {  
     case 0x0: { 
         // Data Processing / PSR Transfer 
-        if(tmp.opcode_id2 & 0x20 == 1 ||
-           tmp.opcode_id1 & 0x01 == 0 || 
-           tmp.opcode_id1 & 0x08 == 0 )
+        if(((tmp.opcode_id2 & 0x20) == 0x20) ||
+           ((tmp.opcode_id1 & 0x01) == 0) || 
+           ((tmp.opcode_id1 & 0x08) == 0) )
         {
             switch(opcode)
             {
@@ -76,7 +76,7 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
             case 0x8: {
                     if (tmp.opcode_id2 & 0x1) // S[1]
                         TST(instruction.word);
-                    else if (tmp.word & 0x020F0FFF == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
+                    else if ((tmp.word & 0x020F0FFF) == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
                         MRS(instruction.word);
                     else
                         undef(instruction.word);
@@ -85,31 +85,31 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
             case 0x9: {
                     if (tmp.opcode_id2 & 0x1) // S[1]
                         TEQ(instruction.word);
-                    else if (tmp.word & 0x0200F000 == 0x0200F000) // I[1] && SBO [12:15]
+                    else if ((tmp.word & 0x0200F000) == 0x0200F000) // I[1] && SBO [12:15]
                         MSR(instruction.word);
-                    else if (tmp.word & 0x0200FFF0 == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
+                    else if ((tmp.word & 0x0200FFF0) == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
                         MSR(instruction.word);
-                    else if (tmp.word & 0x020FFF10 == 0x000FFF10) // I[0] && SBO [8:19] && [4] set
+                    else if ((tmp.word & 0x020FFF10) == 0x000FFF10) // I[0] && SBO [8:19] && [4] set
                         BX(instruction.word);
                     else
                         undef(instruction.word);
                     break; 
                 }
             case 0xA: {
-                    if (tmp.word & 0x0010F000 == 0x00100000) // S[1] && SBZ [12:15]
+                    if ((tmp.word & 0x0010F000) == 0x00100000) // S[1] && SBZ [12:15]
                         CMP(instruction.word);
-                    else if (tmp.word & 0x020F0FFF == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
+                    else if ((tmp.word & 0x020F0FFF) == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
                         MRS(instruction.word);
                     else
                         undef(instruction.word);
                     break;
                 }
             case 0xB: {
-                    if (tmp.word & 0x0010F000 == 0x00100000) // S[1] && SBZ [12:15]
+                    if ((tmp.word & 0x0010F000) == 0x00100000) // S[1] && SBZ [12:15]
                         CMN(instruction.word);
-                    else if (tmp.word & 0x0200F000 == 0x0200F000) // I[1] && SBO [12:15]
+                    else if ((tmp.word & 0x0200F000) == 0x0200F000) // I[1] && SBO [12:15]
                         MSR(instruction.word);
-                    else if (tmp.word & 0x0200FFF0 == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
+                    else if ((tmp.word & 0x0200FFF0) == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
                         MSR(instruction.word);
                     else
                         undef(instruction.word);
@@ -117,7 +117,7 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
                 }
             case 0xC: ORR(instruction.word); break;
             case 0xD: {
-                    if (tmp.word & 0xF0000 == 0x00000) // SBZ [16:19]
+                    if ((tmp.word & 0xF0000) == 0x00000) // SBZ [16:19]
                         MOV(instruction.word);
                     else
                         undef(instruction.word);
@@ -125,7 +125,7 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
                 }
             case 0xE: BIC(instruction.word); break;
             case 0xF: {
-                    if (tmp.word & 0xF0000 == 0x00000) // SBZ [16:19]
+                    if ((tmp.word & 0xF0000) == 0x00000) // SBZ [16:19]
                         MVN(instruction.word);
                     else
                         undef(instruction.word);
@@ -154,21 +154,21 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
             break;
 
         case 0xB:
-            if(tmp.opcode_id2 & 1 == 1)
+            if((tmp.opcode_id2 & 1) == 1)
                 LDRH(instruction.word);
             else
                 STRH(instruction.word);
             break;
 
         case 0xD:
-            if(tmp.opcode_id2 & 1 == 1)
+            if((tmp.opcode_id2 & 1) == 1)
                 LDRSB(instruction.word);
             else
                 undef(instruction.word);
             break;
 
         case 0xF:
-            if(tmp.opcode_id2 & 1 == 1)
+            if((tmp.opcode_id2 & 1) == 1)
                 LDRSH(instruction.word);
             else
                 undef(instruction.word);
