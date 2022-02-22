@@ -203,9 +203,9 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     case 0x2: {
         switch(tmp.opcode_id2 & 0x21) // isolate bits 20 and 25
         {
-        case 0x2: case 0x21: B(instruction.word); break; // xx1x xxxx
-        case 0x1: LDM(instruction.word); break; // xxxx xxx1
-        case 0x0: STM(instruction.word); break; // xxxx xxx0
+        case 0x20: case 0x21: B(instruction.word); break; // xx1x xxx0 U xx1x xxx1
+        case 0x01: LDM(instruction.word); break; // xx0x xxx1
+        case 0x00: STM(instruction.word); break; // xx0x xxx0
         }
         break;
     }
