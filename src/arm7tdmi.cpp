@@ -51,7 +51,9 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
 
 void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     union _instruction tmp = instruction;
+
     uint8_t opcode;
+    opcode = (tmp.opcode_id2 & 0x1E) >> 1; //isolating opcode bits
     // tmp.word = //fetch(bus_controller);
 
     uint16_t opcode_id = 0;   
@@ -59,121 +61,85 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
     opcode_id <<= 4;
     opcode_id |= tmp.opcode_id1;
 
-    opcode=(tmp.opcode_id2 & 30)>>1;//isolating opcode bits
 
     // 011x xxxx xxx1
     if((opcode_id >> 9 == 3) && ((opcode_id & 1) == 1))
         undefined_handler(); // undefined instruction
 
-    switch(tmp.opcode_id2>>6)
+    switch(tmp.opcode_id2 >> 6) // check bits [26:27]
     {  
-    case 0x0: // bit 26-27 unset
+    case 0x0: { 
+        // Data Processing / PSR Transfer 
+        if(tmp.opcode_id2 & 0x20 == 1 ||
+           tmp.opcode_id1 & 0x01 == 0 || 
+           tmp.opcode_id1 & 0x08 == 0 )
         {
-        if(tmp.opcode_id2 & 32 == 0 || !(tmp.opcode_id1 & 1 == 0) || !(tmp.opcode_id1 & 8 == 0)){//bit 25 set or bit 4 unset  or bit 7 unset
-            switch(opcode){
-                case 0x0:AND(instruction.word); break;
-                case 0x1:EOR(instruction.word); break;
-                case 0x2:SUB(instruction.word); break;
-                case 0x3:RSB(instruction.word); break;
-                case 0x4:ADD(instruction.word); break;
-                case 0x5:ADC(instruction.word); break;
-                case 0x6:SBC(instruction.word); break;
-                case 0x7:RSC(instruction.word); break;
-                case 0x8:{
-                    if(tmp.opcode_id2&1){//bit 20 set
-                        TST(instruction.word); 
-                    }else{
-                        if((tmp.word>>16)&15 == 1 && ((tmp.word>>12)==0) && (tmp.opcode_id2&32)==0 ){//bit[16:19] set and bit[0:11] unset and bit[25] unset
-                            MRS(instruction.word);
-                        }else{
-                            undefined_handler();
-                        }
-                    }
+            switch(opcode)
+            {
+            case 0x0: AND(instruction.word); break;
+            case 0x1: EOR(instruction.word); break;
+            case 0x2: SUB(instruction.word); break;
+            case 0x3: RSB(instruction.word); break;
+            case 0x4: ADD(instruction.word); break;
+            case 0x5: ADC(instruction.word); break;
+            case 0x6: SBC(instruction.word); break;
+            case 0x7: RSC(instruction.word); break;
+            case 0x8: {
+                    if (tmp.opcode_id2 & 0x1) // S[1]
+                        TST(instruction.word);
+                    else if (tmp.word & 0x020F0FFF == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
+                        MRS(instruction.word);
+                    else
+                        undefined_handler();
                     break;
                 }
-                case 0x9:{
-                    if(tmp.opcode_id2 & 1){// bit 20 set(S flag == 1)
+            case 0x9: {
+                    if (tmp.opcode_id2 & 0x1) // S[1]
                         TEQ(instruction.word);
-                    }else{//bit 20 unset(S flag == 0)
-                        if(tmp.opcode_id2 & 32 == 0){//bit 25 set(I flag == 1)
-                            if((tmp.word>>12)&15==15){//bit[12:15] set
-                                MSR(instruction.word);
-                            }else 
-                                undefined_handler();
-                        }else{//bit 25 unset(I flag == 0)
-                            if(tmp.opcode_id1 == 0){//bit[4:7] unset
-                                if((tmp.word >>12)&15 == 15 && (tmp.word >>12)&15 == 0){//bit[12:15] set and bit[8:11] unset
-                                    MSR(instruction.word);
-                                }else
-                                    undefined_handler();
-                            }else if(tmp.opcode_id1 == 1){
-                                    if((tmp.word>>8)&4095 == 4095){//bit[8:19] set
-                                        BX(instruction.word);
-                                    }else
-                                        undefined_handler();
-                            }else 
-                                undefined_handler();
-                        }
-                    }
+                    else if (tmp.word & 0x0200F000 == 0x0200F000) // I[1] && SBO [12:15]
+                        MSR(instruction.word);
+                    else if (tmp.word & 0x0200FFF0 == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
+                        MSR(instruction.word);
+                    else if (tmp.word & 0x020FFF10 == 0x000FFF10) // I[0] && SBO [8:19] && [4] set
+                        BX(instruction.word);
+                    else
+                        undefined_handler();
+                    break; 
+                }
+            case 0xA: {
+                    if (tmp.word & 0x0010F000 == 0x00100000) // S[1] && SBZ [12:15]
+                        CMP(instruction.word);
+                    else if (tmp.word & 0x020F0FFF == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
+                        MRS(instruction.word);
+                    else
+                        undefined_handler();
                     break;
                 }
-                case 0xA:{
-                    if((tmp.opcode_id2&1)==1){//bit 20 set(S flag == 1)
-                        if((tmp.word>>12)&15 == 0){//bit[12:15] unset
-                            CMP(instruction.word);
-                        }else{
-                            undefined_handler();
-                        }
-                    }else{//bit 20 unset(S flag == 0)
-                        if((tmp.word>>16)&15==1 && (tmp.word&4095) == 0 && (tmp.opcode_id2&32)==0){//bit[16:19] set and bit[0:11] unset and bit[25] unset
-                            MRS(instruction.word);
-                        }else 
-                            undefined_handler();
-                    }
-                   
+            case 0xB: {
+                    if (tmp.word & 0x0010F000 == 0x00100000) // S[1] && SBZ [12:15]
+                        CMN(instruction.word);
+                    else if (tmp.word & 0x0200F000 == 0x0200F000) // I[1] && SBO [12:15]
+                        MSR(instruction.word);
+                    else if (tmp.word & 0x0200FFF0 == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
+                        MSR(instruction.word);
+                    else
+                        undefined_handler();
                     break;
                 }
-                case 0xB:{
-                    if((tmp.opcode_id2&1)==1){//bit 20 set(S flag == 0)
-                        if(((tmp.word>>12) & 15) == 0){//bit[12:15] unset
-                            CMN(instruction.word);
-                        }else{
-                            undefined_handler();
-                        }
-                    }else{//bit 20 unset(S flag == 1)
-                        if((tmp.opcode_id2&32) == 1){//bit 25 set(I flag == 1)
-                            if(((tmp.word>>12) & 15) == 1){
-                                MSR(instruction.word);
-                            }else{
-                                undefined_handler();
-                            }
-                        }else{//bit 25 unset (I flag == 0)
-                            if(tmp.opcode_id1 == 0 && ((tmp.word>>12)&15 ==1) && (tmp.word>>8)&15 == 0){//bit [4:7] unset and bit[12:15] set and bit[8:11] unset
-                                MSR(instruction.word);
-                            }else{
-                                undefined_handler();
-                            }
-                        }
-                    }
-                    break;
-                
-                }
-                case 0xC:ORR(instruction.word); break;
-                case 0xD:{
-                    if(((tmp.word>>16) & 15)==0){//bit[16:19] unset
+            case 0xC: ORR(instruction.word); break;
+            case 0xD: {
+                    if (tmp.word & 0xF0000 == 0x00000) // SBZ [16:19]
                         MOV(instruction.word);
-                    }else{
+                    else
                         undefined_handler();
-                    }
                     break;
                 }
-                case 0xE:BIC(instruction.word); break;
-                case 0xF:{
-                     if(((tmp.word>>16) & 15)==0){//bit[16:19] unset
+            case 0xE: BIC(instruction.word); break;
+            case 0xF: {
+                    if (tmp.word & 0xF0000 == 0x00000) // SBZ [16:19]
                         MVN(instruction.word);
-                    }else{
+                    else
                         undefined_handler();
-                    }
                     break;
                 }
             }
@@ -196,16 +162,6 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
                 // Single Data Swap
                 case 0x10: SWP(instruction.word); break;
                 case 0x14: SWPB(instruction.word); break;
-
-                default:
-                // Halfword Data Transfer: register/immediate
-                // Single Data Transfer
-                // Block Data Transfer
-                // Branch
-                // Coprocessor Data Transfer
-                // Coprocessor Register Transfer
-                // Software Interrupt
-                break;
             }
             break;
 
@@ -230,44 +186,36 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction instruction){
                 undefined_handler();
             break;
         }
-        }
         break;
+    }
 
-    case 0x1:
+    case 0x1: {
+        switch(tmp.opcode_id2 & 0x5) // isolate bits 20 and 22
         {
-            if(tmp.opcode_id2 & 1 == 1)
-            {
-                if(tmp.opcode_id2 & 4 == 1) LDRB(instruction.word);
-                else LDR(instruction.word);
-            }
-            else
-            {
-                if(tmp.opcode_id2 & 4 == 1) STRB(instruction.word);
-                else STR(instruction.word);
-            }
-
+        case 0x0: STR(instruction.word); break;  // xxxx x0x0
+        case 0x1: LDR(instruction.word); break;  // xxxx x0x1
+        case 0x4: STRB(instruction.word); break; // xxxx x1x0
+        case 0x5: LDRB(instruction.word); break; // xxxx x1x1
         }
         break;
+    }
 
-    case 0x2:
-        {   
-            if(tmp.opcode_id2 & 0x20 == 1)
-            {
-                B(instruction.word);
-            }
-            else
-            {
-                if(tmp.opcode_id2 & 1 == 1) LDM(instruction.word);
-                else STM(instruction.word);
-            }
+    case 0x2: {
+        switch(tmp.opcode_id2 & 0x21) // isolate bits 20 and 25
+        {
+        case 0x2: case 0x21: B(instruction.word); break; // xx1x xxxx
+        case 0x1: LDM(instruction.word); break; // xxxx xxx1
+        case 0x0: STM(instruction.word); break; // xxxx xxx0
         }
         break;
+    }
 
-    case 0x3:
-        {   
-            if(tmp.opcode_id2 & 0x30) SWI(instruction.word);
-            else undefined_handler();
-        }
+    case 0x3: {   
+        if(tmp.opcode_id2 & 0x30)
+            SWI(instruction.word);
+        else 
+            undefined_handler();
         break;
+    }
     }
 }
