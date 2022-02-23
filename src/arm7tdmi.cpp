@@ -86,8 +86,8 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         {
         case 0x10: case 0x11: case 0x12: case 0x13: 
         case 0x14: case 0x15: case 0x16: case 0x17: ASR(ins);  break; // 0001 0xxx
-        case 0x18: case 0x19: case 0x1C: case 0x1D: ADDS(ins); break; // 0001 1x0x
-        case 0x1A: case 0x1B: case 0x1E: case 0x1F: SUBS(ins); break; // 0001 1x1x
+        case 0x18: case 0x19: case 0x1C: case 0x1D: ADD(ins); break; // 0001 1x0x
+        case 0x1A: case 0x1B: case 0x1E: case 0x1F: SUB(ins); break; // 0001 1x1x
         }
         break;
     }
@@ -95,7 +95,7 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         switch(hi_byte)
         {
         case 0x20: case 0x21: case 0x22: case 0x23:
-        case 0x24: case 0x25: case 0x26: case 0x27: MOVS(ins); break; // 0010 0xxx
+        case 0x24: case 0x25: case 0x26: case 0x27: MOV(ins); break; // 0010 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
         case 0x2A: case 0x2B: case 0x2E: case 0x2F: CMP(ins); break;  // 0010 1xxx
         }
@@ -105,9 +105,9 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         switch(hi_byte)
         {
         case 0x20: case 0x21: case 0x22: case 0x23:
-        case 0x24: case 0x25: case 0x26: case 0x27: ADDS(ins); break; // 0011 0xxx
+        case 0x24: case 0x25: case 0x26: case 0x27: ADD(ins); break; // 0011 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
-        case 0x2A: case 0x2B: case 0x2E: case 0x2F: SUBS(ins); break; // 0011 1xxx
+        case 0x2A: case 0x2B: case 0x2E: case 0x2F: SUB(ins); break; // 0011 1xxx
         }
         break;
     }
@@ -117,22 +117,22 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         case 0x0: { // ALU operations
             switch((ins.halfword_lo & 0x03C0) >> 6) // isolate opcode
             {
-            case 0x0: ANDS(ins); break;
-            case 0x1: EORS(ins); break;
+            case 0x0: AND(ins); break;
+            case 0x1: EOR(ins); break;
             case 0x2: LSL(ins); break;
             case 0x3: LSR(ins); break;
             case 0x4: ASR(ins); break;
-            case 0x5: ADCS(ins); break;
-            case 0x6: SBCS(ins); break;
+            case 0x5: ADC(ins); break;
+            case 0x6: SBC(ins); break;
             case 0x7: ROR(ins); break;
             case 0x8: TST(ins); break;
             case 0x9: NEG(ins); break;
             case 0xA: CMP(ins); break;
             case 0xB: CMN(ins); break;
-            case 0xC: ORRS(ins); break;
-            case 0xD: MULS(ins); break;
-            case 0xE: BICS(ins); break;
-            case 0xF: MVNS(ins); break;
+            case 0xC: ORR(ins); break;
+            case 0xD: MUL(ins); break;
+            case 0xE: BIC(ins); break;
+            case 0xF: MVN(ins); break;
             }
         }  
         case 0x1: { // High Register operations/Branch Exchange
@@ -248,13 +248,13 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
         {
             switch(opcode)
             {
-            case 0x0: AND(ins); break;
-            case 0x1: EOR(ins); break;
-            case 0x2: SUB(ins); break;
+            case 0x0: ANDS(ins); break;
+            case 0x1: EORS(ins); break;
+            case 0x2: SUBS(ins); break;
             case 0x3: RSB(ins); break;
-            case 0x4: ADD(ins); break;
-            case 0x5: ADC(ins); break;
-            case 0x6: SBC(ins); break;
+            case 0x4: ADDS(ins); break;
+            case 0x5: ADCS(ins); break;
+            case 0x6: SBCS(ins); break;
             case 0x7: RSC(ins); break;
             case 0x8: {
                     if (ins.opcode_id2 & 0x1) // S[1]
@@ -301,15 +301,15 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
             case 0xC: ORR(ins); break;
             case 0xD: {
                     if ((ins.word & 0xF0000) == 0x00000) // SBZ [16:19]
-                        MOV(ins);
+                        MOVS(ins);
                     else
                         undef(ins);
                     break;
                 }
-            case 0xE: BIC(ins); break;
+            case 0xE: BICS(ins); break;
             case 0xF: {
                     if ((ins.word & 0xF0000) == 0x00000) // SBZ [16:19]
-                        MVN(ins);
+                        MVNS(ins);
                     else
                         undef(ins);
                     break;
@@ -323,7 +323,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
         case 0x9:
             switch(ins.opcode_id2)
             {   // Multiply       
-            case 0x0: case 0x1: MUL(ins); break;
+            case 0x0: case 0x1: MULS(ins); break;
             case 0x2: case 0x3: MLA(ins); break;
                 // Multiply Long
             case 0x8: case 0x9: UMULL(ins); break;
