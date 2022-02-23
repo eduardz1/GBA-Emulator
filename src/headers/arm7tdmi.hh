@@ -31,7 +31,7 @@ public: // should be made private
     };
 
     //By using the union, we can access single bits fro the uint32_t word parameter by switching to the single bit(i.e. bit)
-    union _register
+    union _register_type
     {
         struct
         {
@@ -53,7 +53,7 @@ public: // should be made private
     };
     /*Rd usually is the destination register
       Rn usually is the 1st operand register*/
-    std::array<_register,NUM>registers;
+    std::array<_register_type,NUM>registers;
 
     enum _instruction_type{
         DATA_PROCESSING,
@@ -128,17 +128,8 @@ public:
     
     _mode get_mode();
     _cond get_cond(_instruction instruction);
-    _register get_register(_registers reg);
-
-    /*
-    switch(get_mode())
-        THUMB:
-
-            
-        ARM32:
-            
-    
-    */
+    _register_type get_register(_registers reg);
+    void set_register(_registers reg, uint32_t val);
 
 public:
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR

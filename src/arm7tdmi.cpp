@@ -17,12 +17,19 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
 }
 
 /*Return the condition to be applied for a given condition*/
-Arm7tdmi::_cond Arm7tdmi::get_cond(_instruction instruction){
+Arm7tdmi::_cond Arm7tdmi::get_cond(_instruction instruction)
+{
     return (_cond)(instruction.word>>28);
 }
 
-Arm7tdmi::_register Arm7tdmi::get_register(_registers reg){
+Arm7tdmi::_register_type Arm7tdmi::get_register(Arm7tdmi::_registers reg)
+{
     return registers[reg];
+}
+
+void Arm7tdmi::set_register(Arm7tdmi::_registers reg, uint32_t val)
+{
+    registers[reg].word = val;
 }
 
 void Arm7tdmi::set_mode(enum _mode mode)
