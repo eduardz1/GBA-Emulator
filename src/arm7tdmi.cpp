@@ -16,15 +16,32 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
     return registers[R15].word & 0x00000003 ? THUMB_MODE : ARM_MODE;
 }
 
-/*Return the condition to be applied for a given condition*/
-Arm7tdmi::_cond Arm7tdmi::get_cond(_instruction instruction)
-{
-    return (_cond)(instruction.word>>28);
-}
-
 Arm7tdmi::_register_type Arm7tdmi::get_register(Arm7tdmi::_registers reg)
 {
     return registers[reg];
+}
+
+bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
+{
+    _register_type cpsr = get_register(CPSR);
+    switch(condition)
+    {
+    case EQ: // Z set
+    case NE: return cpsr.Z; // Z clear
+    case CS: // C set
+    case CC: return cpsr.C; // C clear
+    case MI: // N set
+    case PL: return cpsr.N; // N clear
+    case VS: // V set
+    case VC: return cpsr.V; // V clear
+    case HI: return cpsr.C && !cpsr.Z; // C set && Z clear
+    case LS: return !cpsr.C || cpsr.Z; // C clear || Z set
+    case GE: return cpsr.N == cpsr.V;
+    case LT: return cpsr.N != cpsr.V;
+    case GT: return !cpsr.Z && (cpsr.N == cpsr.V);
+    case LE: return cpsr.Z || (cpsr.N != cpsr.V);
+    case AL: return true;
+    }
 }
 
 void Arm7tdmi::set_register(Arm7tdmi::_registers reg, uint32_t val)

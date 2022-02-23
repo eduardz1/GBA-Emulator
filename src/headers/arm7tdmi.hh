@@ -127,9 +127,10 @@ public:
 
     
     _mode get_mode();
-    _cond get_cond(_instruction instruction);
     _register_type get_register(_registers reg);
     void set_register(_registers reg, uint32_t val);
+
+    bool evaluate_cond(_cond condition);
 
 public:
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
