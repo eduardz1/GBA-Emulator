@@ -5,7 +5,7 @@
 #include <iostream>
 #include "bus.hh"
 namespace cpu
-{ 
+{
 class Arm7tdmi
 {
 public: // should be made private
@@ -78,8 +78,8 @@ public: // should be made private
     };
 
 
-    union _instruction{
-        // 
+    union _instruction
+    {
         struct
         {
             uint32_t Rm : 4;
@@ -90,7 +90,22 @@ public: // should be made private
             uint32_t opcode_id2 : 8;
             uint32_t cond : 4;
         };
+
+        struct
+        {
+            uint16_t halfword_lo;
+            uint16_t halfword_hi;
+        };
+
         uint32_t word;
+    };
+
+    enum _cond
+    {
+        EQ, NE, CS, CC, MI,
+        PL, VS, VC, HI, LS,
+        GE, LT, GT, LE, 
+        AL // unconditional branch
     };
 
 public:
@@ -99,7 +114,9 @@ public:
 
     /*Fetching next instruction from the bus linked to the RAM*/
     uint32_t fetch(Bus bus_controller);
-    /*Decoding the instruction to be executed*/
+
+    void decode_executeARM32( _instruction instruction);
+    void decode_executeTHUMB( _instruction instruction);
     void decode_execute( _instruction instruction);
     
     // set CPU mode with a change in register 15
@@ -109,46 +126,71 @@ public:
     _mode get_mode();
 
 public:
-    void undef(uint32_t instruction) { std::cout << "undef" << std::endl; } // ERROR
-    void ADC(uint32_t instruction) { std::cout << "ADC" << std::endl; }
-    void ADD(uint32_t instruction) { std::cout << "ADD" << std::endl; }
-    void AND(uint32_t instruction) { std::cout << "AND" << std::endl; }
-    void B(uint32_t instruction) { std::cout << "B" << std::endl; }
-    void BIC(uint32_t instruction) { std::cout << "BIC" << std::endl; }
-    void BX(uint32_t instruction) { std::cout << "BX" << std::endl; }
-    void CMN(uint32_t instruction) { std::cout << "CMN" << std::endl; }
-    void CMP(uint32_t instruction) { std::cout << "CMP" << std::endl; }
-    void EOR(uint32_t instruction) { std::cout << "EOR" << std::endl; }
-    void LDM(uint32_t instruction) { std::cout << "LDM" << std::endl; }
-    void LDR(uint32_t instruction) { std::cout << "LDR" << std::endl; }
-    void LDRB(uint32_t instruction) { std::cout << "LDRB" << std::endl; }
-    void LDRH(uint32_t instruction) { std::cout << "LDRH" << std::endl; }
-    void LDRSB(uint32_t instruction) { std::cout << "LDRSB" << std::endl; }
-    void LDRSH(uint32_t instruction) { std::cout << "LDRSH" << std::endl; }
-    void MLA(uint32_t instruction) { std::cout << "MLA" << std::endl; }
-    void MOV(uint32_t instruction) { std::cout << "MOV" << std::endl; }
-    void MRS(uint32_t instruction) { std::cout << "MRS" << std::endl; }
-    void MSR(uint32_t instruction) { std::cout << "MSR" << std::endl; }
-    void MUL(uint32_t instruction) { std::cout << "MUL" << std::endl; }
-    void MVN(uint32_t instruction) { std::cout << "MVN" << std::endl; }
-    void ORR(uint32_t instruction) { std::cout << "ORR" << std::endl; }
-    void RSB(uint32_t instruction) { std::cout << "RSB" << std::endl; }
-    void RSC(uint32_t instruction) { std::cout << "RSC" << std::endl; }
-    void SBC(uint32_t instruction) { std::cout << "SBC" << std::endl; }
-    void SMLAL(uint32_t instruction) { std::cout << "SMLAL" << std::endl; }
-    void SMULL(uint32_t instruction) { std::cout << "SMULL" << std::endl; }
-    void STM(uint32_t instruction) { std::cout << "STM" << std::endl; }
-    void STR(uint32_t instruction) { std::cout << "STR" << std::endl; }
-    void STRB(uint32_t instruction) { std::cout << "STRB" << std::endl; }
-    void STRH(uint32_t instruction) { std::cout << "STRH" << std::endl; }
-    void SUB(uint32_t instruction) { std::cout << "SUB" << std::endl; }
-    void SWI(uint32_t instruction) { std::cout << "SWI" << std::endl; }
-    void SWP(uint32_t instruction) { std::cout << "SWP" << std::endl; }
-    void SWPB(uint32_t instruction) { std::cout << "SWPB" << std::endl; }
-    void TEQ(uint32_t instruction) { std::cout << "TEQ" << std::endl; }
-    void TST(uint32_t instruction) { std::cout << "TST" << std::endl; }
-    void UMLAL(uint32_t instruction) { std::cout << "UMLAL" << std::endl; }
-    void UMULL(uint32_t instruction) { std::cout << "UMULL" << std::endl; }
+    void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
+    
+    // ARM instructions
+    void ADC(_instruction instruction) { std::cout << "ADC" << std::endl; }
+    void ADD(_instruction instruction) { std::cout << "ADD" << std::endl; }
+    void AND(_instruction instruction) { std::cout << "AND" << std::endl; }
+    void B(_instruction instruction, _cond condition) { std::cout << "B" << std::endl; }
+    void BIC(_instruction instruction) { std::cout << "BIC" << std::endl; }
+    void BX(_instruction instruction) { std::cout << "BX" << std::endl; }
+    void CMN(_instruction instruction) { std::cout << "CMN" << std::endl; }
+    void CMP(_instruction instruction) { std::cout << "CMP" << std::endl; }
+    void EOR(_instruction instruction) { std::cout << "EOR" << std::endl; }
+    void LDM(_instruction instruction) { std::cout << "LDM" << std::endl; }
+    void LDR(_instruction instruction) { std::cout << "LDR" << std::endl; }
+    void LDRB(_instruction instruction) { std::cout << "LDRB" << std::endl; }
+    void LDRH(_instruction instruction) { std::cout << "LDRH" << std::endl; }
+    void LDRSB(_instruction instruction) { std::cout << "LDRSB" << std::endl; }
+    void LDRSH(_instruction instruction) { std::cout << "LDRSH" << std::endl; }
+    void MLA(_instruction instruction) { std::cout << "MLA" << std::endl; }
+    void MOV(_instruction instruction) { std::cout << "MOV" << std::endl; }
+    void MRS(_instruction instruction) { std::cout << "MRS" << std::endl; }
+    void MSR(_instruction instruction) { std::cout << "MSR" << std::endl; }
+    void MUL(_instruction instruction) { std::cout << "MUL" << std::endl; }
+    void MVN(_instruction instruction) { std::cout << "MVN" << std::endl; }
+    void ORR(_instruction instruction) { std::cout << "ORR" << std::endl; }
+    void RSB(_instruction instruction) { std::cout << "RSB" << std::endl; }
+    void RSC(_instruction instruction) { std::cout << "RSC" << std::endl; }
+    void SBC(_instruction instruction) { std::cout << "SBC" << std::endl; }
+    void SMLAL(_instruction instruction) { std::cout << "SMLAL" << std::endl; }
+    void SMULL(_instruction instruction) { std::cout << "SMULL" << std::endl; }
+    void STM(_instruction instruction) { std::cout << "STM" << std::endl; }
+    void STR(_instruction instruction) { std::cout << "STR" << std::endl; }
+    void STRB(_instruction instruction) { std::cout << "STRB" << std::endl; }
+    void STRH(_instruction instruction) { std::cout << "STRH" << std::endl; }
+    void SUB(_instruction instruction) { std::cout << "SUB" << std::endl; }
+    void SWI(_instruction instruction) { std::cout << "SWI" << std::endl; }
+    void SWP(_instruction instruction) { std::cout << "SWP" << std::endl; }
+    void SWPB(_instruction instruction) { std::cout << "SWPB" << std::endl; }
+    void TEQ(_instruction instruction) { std::cout << "TEQ" << std::endl; }
+    void TST(_instruction instruction) { std::cout << "TST" << std::endl; }
+    void UMLAL(_instruction instruction) { std::cout << "UMLAL" << std::endl; }
+    void UMULL(_instruction instruction) { std::cout << "UMULL" << std::endl; }
+
+    // THUMB instructions
+    void LSL(_instruction instruction) { std::cout << "LSL" << std::endl; }
+    void LSR(_instruction instruction) { std::cout << "LSR" << std::endl; }
+    void ASR(_instruction instruction) { std::cout << "ASR" << std::endl; }
+    void SUBS(_instruction instruction) { std::cout << "SUBS" << std::endl; }
+    void ADDS(_instruction instruction) { std::cout << "ADDS" << std::endl; }
+    void ADCS(_instruction instruction) { std::cout << "ADCS" << std::endl; }
+    void ANDS(_instruction instruction) { std::cout << "ANDS" << std::endl; }
+    void MOVS(_instruction instruction) { std::cout << "MOVS" << std::endl; }
+    void EORS(_instruction instruction) { std::cout << "EORS" << std::endl; }
+    void SBCS(_instruction instruction) { std::cout << "SBCS" << std::endl; }
+    void ROR(_instruction instruction) { std::cout << "ROR" << std::endl; }
+    void ORRS(_instruction instruction) { std::cout << "ORRS" << std::endl; }
+    void NEG(_instruction instruction) { std::cout << "NEG" << std::endl; }
+    void MULS(_instruction instruction) { std::cout << "MULS" << std::endl; }
+    void BICS(_instruction instruction) { std::cout << "BICS" << std::endl; }
+    void MVNS(_instruction instruction) { std::cout << "MVNS" << std::endl; }
+    void PUSH(_instruction instruction) { std::cout << "PUSH" << std::endl; }
+    void POP(_instruction instruction) { std::cout << "POP" << std::endl; }
+    void STMIA(_instruction instruction) { std::cout << "STMIA" << std::endl; }
+    void LDMIA(_instruction instruction) { std::cout << "LDMIA" << std::endl; }
+    void BL(_instruction instruction) { std::cout << "BL" << std::endl; }
 };
 }
 #endif /* !ARM7TDMI_H */
