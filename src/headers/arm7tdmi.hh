@@ -96,6 +96,12 @@ public: // should be made private
         uint32_t word;
     };
 
+    enum _shift{
+        LL,//logical left
+        LR,//logical right
+        AR,//arithmetic right
+        RR//rotate riht
+    };
     enum _cond
     {
         EQ, NE, CS, CC, MI,

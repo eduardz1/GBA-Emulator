@@ -1,7 +1,39 @@
 #include "arm7tdmi.hh"
 using namespace cpu;
 void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
-   
+   _register rd,rn;
+   int32_t op2;
+   uint8_t shift_amount=0;
+   _shift shift_type;
+    rd=get_register((_registers)(instruction.Rd));
+    rn=get_register((_registers)(instruction.Rn));
+    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
+        op2=instruction.word&0xFF;
+    }else{//No immediate operand(bit[25]/I flag unset)
+        op2=get_register((_registers)(instruction.Rm)).word;
+        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
+        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+        }
+    }
+    switch(shift_type){
+        //Gotta handle the carry bit
+        case LL:
+            rd.word=rn.word+(op2<<shift_amount);
+            break;
+        case LR:
+            rd.word=rn.word+(op2>>shift_amount);
+            break;
+        case AR:
+            rd.word=rn.word+(op2>>shift_amount);
+            break;
+        case RR:
+            rd.word=rn.word+(op2<<shift_amount);
+            rd.word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+            break;
+    }
 }
 /*
   Rd = Rn + Op2+ C-bit (ARM32) */
