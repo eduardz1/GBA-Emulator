@@ -16,6 +16,15 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
     return registers[R15].word & 0x00000003 ? THUMB_MODE : ARM_MODE;
 }
 
+/*Return the condition to be applied for a given condition*/
+Arm7tdmi::_cond Arm7tdmi::get_cond(_instruction instruction){
+    return (_cond)(instruction.word>>28);
+}
+
+Arm7tdmi::_register Arm7tdmi::get_register(_registers reg){
+    return registers[reg];
+}
+
 void Arm7tdmi::set_mode(enum _mode mode)
 {
     // in ARM state bits [1:0] of R15 are 0 and bits [31:2] contain te PC
@@ -40,7 +49,7 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
         else 
             return bus_controller.RAM[R15];
 }
-
+/*wrapper for decode_executeARM32/THUMB*/
 void Arm7tdmi::decode_execute(Arm7tdmi::_instruction ins)
 {
     // Undef when [25:27] -> 011 && [4] set
@@ -55,25 +64,25 @@ void Arm7tdmi::decode_execute(Arm7tdmi::_instruction ins)
     else
         decode_executeARM32(ins);
 }
-
+/*Decoding a single THUMB instruction*/
 void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
 {
-    uint8_t hi_byte = ins.halfword_hi >> 8; // isolate hi byte
+    uint8_t hi_byte = ins.halfword_lo >> 8; // isolate hi byte
 
-    switch(hi_byte >> 4) // isolate higher 4 bits to make it more readable
+    switch(hi_byte >> 4) // isolate higher 4 bits to make it more readable (bits[12:15])
     {
     case 0x0: {
-        switch(hi_byte)
+        switch(hi_byte)//bits[8:15]
         {
         case 0x00: case 0x01: case 0x02: case 0x03: 
         case 0x04: case 0x05: case 0x06: case 0x07: LSL(ins); break; // 0000 0xxx
         case 0x08: case 0x09: case 0x0C: case 0x0D:
-        case 0x0A: case 0x0B: case 0x0E: case 0x0F: LSR(ins); break; // 0001 1xxx
+        case 0x0A: case 0x0B: case 0x0E: case 0x0F: LSR(ins); break; // 0000 1xxx
         }
         break;
     }
     case 0x1: {
-        switch(hi_byte)
+        switch(hi_byte)//bits[8:15]
         {
         case 0x10: case 0x11: case 0x12: case 0x13: 
         case 0x14: case 0x15: case 0x16: case 0x17: ASR(ins);  break; // 0001 0xxx
@@ -106,7 +115,7 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         switch((hi_byte & 0x0C))
         {
         case 0x0: { // ALU operations
-            switch((ins.halfword_hi & 0x03C0) >> 6) // isolate opcode
+            switch((ins.halfword_lo & 0x03C0) >> 6) // isolate opcode
             {
             case 0x0: ANDS(ins); break;
             case 0x1: EORS(ins); break;
@@ -133,7 +142,7 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
             case 0x1: CMP(ins); break;
             case 0x2: MOV(ins); break;
             case 0x3:
-                if (ins.halfword_hi & 0x0080) // H0[0]
+                if (ins.halfword_lo & 0x0080) // H0[0]
                     BX(ins);
                 else
                     undef(ins);
@@ -223,7 +232,7 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
     }
     return;
 }
-
+/*Decoding a single ARM32 instruction*/
 void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
 {
     uint8_t opcode;
