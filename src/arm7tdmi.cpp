@@ -16,14 +16,11 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
     return registers[R15].word & 0x00000003 ? THUMB_MODE : ARM_MODE;
 }
 
-Arm7tdmi::_register_type Arm7tdmi::get_register(Arm7tdmi::_registers reg)
-{
-    return registers[reg];
-}
+
 
 bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
 {
-    _register_type cpsr = get_register(CPSR);
+    _register_type cpsr = registers[CPSR];
     switch(condition)
     {
     case EQ: // Z set
@@ -44,10 +41,7 @@ bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
     }
 }
 
-void Arm7tdmi::set_register(Arm7tdmi::_registers reg, uint32_t val)
-{
-    registers[reg].word = val;
-}
+
 
 void Arm7tdmi::set_mode(enum _mode mode)
 {

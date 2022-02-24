@@ -13,7 +13,7 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
         op2=instruction.word&0xFF;
     }else{//No immediate operand(bit[25]/I flag unset)
-        op2=get_register((_registers)(instruction.Rm)).word;
+        op2=registers[(_registers)(instruction.Rm)].word;
         if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
             shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
         }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
