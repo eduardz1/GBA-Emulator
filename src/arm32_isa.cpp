@@ -1,5 +1,6 @@
 #include "arm7tdmi.hh"
 using namespace cpu;
+#pragma region //ALU OPERATIONS
 void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
     { 
@@ -38,8 +39,7 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
     }
     }
 }
-/*
-  Rd = Rn + Op2+ C-bit (ARM32) */
+/* Rd = Rn + Op2+ C-bit (ARM32) */
 void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction){
    if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
     { 
@@ -650,6 +650,7 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction instruction){
     }
     }
 }
+#pragma endregion
 void Arm7tdmi::B(Arm7tdmi::_instruction instruction, _cond condition){}
 void Arm7tdmi::BX(Arm7tdmi::_instruction instruction){}
 void Arm7tdmi::LDM(Arm7tdmi::_instruction instruction){}
