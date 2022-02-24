@@ -128,7 +128,6 @@ public:
 
     
     _mode get_mode();
-    _register_type get_register(_registers reg);
     void set_register(_registers reg, uint32_t val);
 
     bool evaluate_cond(_cond condition);

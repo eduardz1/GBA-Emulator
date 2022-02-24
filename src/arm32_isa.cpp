@@ -6,8 +6,8 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
    uint8_t shift_amount=0;
    _shift shift_type;
 
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
     shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
 
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
@@ -39,8 +39,8 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
   Rd = Rn + Op2+ C-bit (ARM32) */
 void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
             /*Calcolo dell'operand 2 che non ho voglia di fare perchè mi hai detto di fare prima la thumb xd*/
     
 }
@@ -50,14 +50,14 @@ void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
    uint8_t shift_amount=0;
    _shift shift_type;
 
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
     shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
 
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
         op2=instruction.word&0xFF;
     }else{//No immediate operand(bit[25]/I flag unset)
-        op2=get_register((_registers)(instruction.Rm)).word;
+        op2=registers[(_registers)(instruction.Rm)].word;
         if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
             shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
         }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
@@ -81,8 +81,8 @@ void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
 }
 void Arm7tdmi::BICS(Arm7tdmi::_instruction instruction){
      _register_type rd,rn,op2;
-    rd=get_register((_registers)(instruction.halfword_lo&0xF));
-    rn=get_register((_registers)((instruction.halfword_lo>>4)&0xF));//rn is rs in THUMB
+    rd=registers[(_registers)(instruction.halfword_lo&0xF)];
+    rn=registers[(_registers)((instruction.halfword_lo>>4)&0xF)];//rn is rs in THUMB
     rd.word=rd.word&~rn.word;
 
 }
@@ -92,14 +92,14 @@ void Arm7tdmi::EORS(Arm7tdmi::_instruction instruction){
    uint8_t shift_amount=0;
    _shift shift_type;
 
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
     shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
 
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
         op2=instruction.word&0xFF;
     }else{//No immediate operand(bit[25]/I flag unset)
-        op2=get_register((_registers)(instruction.Rm)).word;
+        op2=registers[(_registers)(instruction.Rm)].word;
         if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
             shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
         }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
@@ -127,14 +127,14 @@ void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
    uint8_t shift_amount=0;
    _shift shift_type;
 
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
     shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
 
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
         op2=instruction.word&0xFF;
     }else{//No immediate operand(bit[25]/I flag unset)
-        op2=get_register((_registers)(instruction.Rm)).word;
+        op2=registers[(_registers)(instruction.Rm)].word;
         if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
             shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
         }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
@@ -158,8 +158,8 @@ void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
 }
 void Arm7tdmi::MVNS(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
             /*Calcolo dell'operand 2 che non ho voglia di fare perchè mi hai detto di fare prima la thumb xd*/
 }
 void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){
@@ -168,14 +168,14 @@ void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){
    uint8_t shift_amount=0;
    _shift shift_type;
 
-    rd=get_register((_registers)(instruction.Rd));
-    rn=get_register((_registers)(instruction.Rn));
+    rd=registers[(_registers)(instruction.Rd)];
+    rn=registers[(_registers)(instruction.Rn)];
     shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
 
     if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
         op2=instruction.word&0xFF;
     }else{//No immediate operand(bit[25]/I flag unset)
-        op2=get_register((_registers)(instruction.Rm)).word;
+        op2=registers[(_registers)(instruction.Rm)].word;
         if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
             shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
         }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
