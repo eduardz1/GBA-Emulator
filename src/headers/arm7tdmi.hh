@@ -98,9 +98,10 @@ public: // should be made private
 
     enum _shift{
         LL,//logical left
-        LR,//logical right
-        AR,//arithmetic right
-        RR//rotate riht
+        //https://stackoverflow.com/questions/5253194/implementing-logical-right-shift-in-c
+        LR,//logical right  shifted bits are replaced by 0 without taking into account the MSB bit(aka sign bit)
+        AR,//arithmetic right  shifted bits are replaced by 0 if positive, 1 otherwise
+        RR//rotate right
     };
     enum _cond
     {

@@ -25,7 +25,7 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
             rd.word=rn.word+(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word+(op2>>shift_amount);
+            rd.word=rn.word+((uint32_t)op2>>shift_amount);
             break;
         case AR:
             rd.word=rn.word+(op2>>shift_amount);
@@ -69,7 +69,7 @@ void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
             rd.word=rn.word&(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word&(op2>>shift_amount);
+            rd.word=rn.word&((uint32_t)op2>>shift_amount);
             break;
         case AR:
             rd.word=rn.word&(op2>>shift_amount);
@@ -111,7 +111,7 @@ void Arm7tdmi::EORS(Arm7tdmi::_instruction instruction){
             rd.word=rn.word^(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word^(op2>>shift_amount);
+            rd.word=rn.word^((uint32_t)op2>>shift_amount);
             break;
         case AR:
             rd.word=rn.word^(op2>>shift_amount);
@@ -146,7 +146,7 @@ void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
             rd.word=rn.word*(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word*(op2>>shift_amount);
+            rd.word=rn.word*((uint32_t)op2>>shift_amount);
             break;
         case AR:
             rd.word=rn.word*(op2>>shift_amount);
@@ -187,7 +187,7 @@ void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){
             rd.word=rn.word|(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word|(op2>>shift_amount);
+            rd.word=rn.word|((uint32_t)op2>>shift_amount);
             break;
         case AR:
             rd.word=rn.word|(op2>>shift_amount);
