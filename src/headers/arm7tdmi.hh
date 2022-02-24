@@ -125,8 +125,10 @@ public:
     
     // set CPU mode with a change in register 15
     void set_mode(enum _mode mode);
+
     
     _mode get_mode();
+    void set_register(_registers reg, uint32_t val);
 
     bool evaluate_cond(_cond condition);
 

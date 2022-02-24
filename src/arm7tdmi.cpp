@@ -23,14 +23,14 @@ bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
     _register_type cpsr = registers[CPSR];
     switch(condition)
     {
-    case EQ: // Z set
-    case NE: return cpsr.Z; // Z clear
-    case CS: // C set
-    case CC: return cpsr.C; // C clear
-    case MI: // N set
-    case PL: return cpsr.N; // N clear
-    case VS: // V set
-    case VC: return cpsr.V; // V clear
+    case EQ: return cpsr.Z==1;// Z set
+    case NE: return cpsr.Z==0;// Z clear
+    case CS: return cpsr.C==1;// C set
+    case CC: return cpsr.C==0;// C clear
+    case MI: return cpsr.N==1;// N set
+    case PL: return cpsr.N==0;// N clear
+    case VS: return cpsr.V==1;// V set
+    case VC: return cpsr.V==0;// V clear
     case HI: return cpsr.C && !cpsr.Z; // C set && Z clear
     case LS: return !cpsr.C || cpsr.Z; // C clear || Z set
     case GE: return cpsr.N == cpsr.V;
@@ -41,7 +41,10 @@ bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
     }
 }
 
-
+void Arm7tdmi::set_register(Arm7tdmi::_registers reg, uint32_t val)
+{
+    registers[reg].word = val;
+}
 
 void Arm7tdmi::set_mode(enum _mode mode)
 {
