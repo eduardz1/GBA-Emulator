@@ -25,16 +25,16 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word+(op2<<shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word+(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word+((uint32_t)op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word+((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word+(op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word+(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+            registers[(_registers)instruction.Rd].word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -64,16 +64,16 @@ void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word+(op2<<shift_amount)+registers[CPSR].C;
+           registers[(_registers)instruction.Rd].word=rn.word+(op2<<shift_amount)+registers[CPSR].C;
             break;
         case LR:
-            rd.word=rn.word+((uint32_t)op2>>shift_amount)+registers[CPSR].C;
+           registers[(_registers)instruction.Rd].word=rn.word+((uint32_t)op2>>shift_amount)+registers[CPSR].C;
             break;
         case AR:
-            rd.word=rn.word+(op2>>shift_amount)+registers[CPSR].C;
+           registers[(_registers)instruction.Rd].word=rn.word+(op2>>shift_amount)+registers[CPSR].C;
             break;
         case RR:
-            rd.word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C;
+           registers[(_registers)instruction.Rd].word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C;
             break;
     }
     }
@@ -101,16 +101,16 @@ void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word&(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word&((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word&(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -139,16 +139,16 @@ void Arm7tdmi::BICS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word&~(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&~(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word&~((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&~((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word&~(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word&~(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word&~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=rn.word&~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -176,16 +176,16 @@ void Arm7tdmi::EORS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word^(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word^(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word^((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word^((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word^(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word^(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word^((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=rn.word^((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -213,16 +213,16 @@ void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word*(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word*(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word*((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word*((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word*(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word*(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word*((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=rn.word*((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -251,16 +251,16 @@ void Arm7tdmi::MVNS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=~(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=~(op2<<shift_amount);
             break;
         case LR:
-            rd.word=~((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=~((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=~(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=~(op2>>shift_amount);
             break;
         case RR:
-            rd.word=~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -288,16 +288,16 @@ void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word|(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word|(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word|((uint32_t)op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word|((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word|(op2>>shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word|(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word|((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+           registers[(_registers)instruction.Rd].word=rn.word|((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -326,16 +326,16 @@ void Arm7tdmi::SUBS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word-(op2<<shift_amount);
+           registers[(_registers)instruction.Rd].word=rn.word-(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word-((uint32_t)op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word-((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word-(op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word-(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+            registers[(_registers)instruction.Rd].word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -364,16 +364,16 @@ void Arm7tdmi::SBCS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word-(op2<<shift_amount)+registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=rn.word-(op2<<shift_amount)+registers[CPSR].C - 1;
             break;
         case LR:
-            rd.word=rn.word-((uint32_t)op2>>shift_amount)+registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=rn.word-((uint32_t)op2>>shift_amount)+registers[CPSR].C - 1;
             break;
         case AR:
-            rd.word=rn.word-(op2>>shift_amount)+registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=rn.word-(op2>>shift_amount)+registers[CPSR].C - 1;
             break;
         case RR:
-            rd.word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C - 1;
             break;
     }
     }
@@ -403,16 +403,16 @@ void Arm7tdmi::RSB(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=(op2<<shift_amount) - rn.word;
+            registers[(_registers)instruction.Rd].word=(op2<<shift_amount) - rn.word;
             break;
         case LR:
-            rd.word=((uint32_t)op2>>shift_amount) - rn.word;
+            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount) - rn.word;
             break;
         case AR:
-            rd.word=(op2>>shift_amount) - rn.word;
+            registers[(_registers)instruction.Rd].word=(op2>>shift_amount) - rn.word;
             break;
         case RR:
-            rd.word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word;
+            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word;
             break;
     }
     }
@@ -441,16 +441,16 @@ void Arm7tdmi::RSC(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=(op2<<shift_amount) - rn.word +registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=(op2<<shift_amount) - rn.word +registers[CPSR].C - 1;
             break;
         case LR:
-            rd.word=((uint32_t)op2>>shift_amount) - rn.word + registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount) - rn.word + registers[CPSR].C - 1;
             break;
         case AR:
-            rd.word=(op2>>shift_amount) - rn.word +registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=(op2>>shift_amount) - rn.word +registers[CPSR].C - 1;
             break;
         case RR:
-            rd.word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word +registers[CPSR].C - 1;
+            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word +registers[CPSR].C - 1;
             break;
     }
     }
@@ -599,16 +599,16 @@ void Arm7tdmi::TST(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=rn.word&(op2<<shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word&(op2<<shift_amount);
             break;
         case LR:
-            rd.word=rn.word&((uint32_t)op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word&((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=rn.word&(op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=rn.word&(op2>>shift_amount);
             break;
         case RR:
-            rd.word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+            registers[(_registers)instruction.Rd].word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
@@ -636,16 +636,16 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction instruction){
     }
     switch(shift_type){
         case LL:
-            rd.word=(op2<<shift_amount);
+            registers[(_registers)instruction.Rd].word=(op2<<shift_amount);
             break;
         case LR:
-            rd.word=((uint32_t)op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount);
             break;
         case AR:
-            rd.word=(op2>>shift_amount);
+            registers[(_registers)instruction.Rd].word=(op2>>shift_amount);
             break;
         case RR:
-            rd.word=((op2>>shift_amount)|(op2 <<(32-shift_amount)));
+            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount)));
             break;
     }
     }
