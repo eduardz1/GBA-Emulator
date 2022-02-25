@@ -17,7 +17,18 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
 }
 
 
-
+void Arm7tdmi::set_mode(enum _mode mode)
+{
+    // in ARM state bits [1:0] of R15 are 0 and bits [31:2] contain te PC
+    // in THUMB state bit [0] of R15 is 0 and bits [31:1] contain the PC
+    ACCESS_MODE=mode;
+}
+/*Not sure if the current mode I am in has to be taken into account when fetching the new mode
+  Aka, should the mode be got in the SPSR_svc register if i am in the supervisor register?*/
+Arm7tdmi::_access_mode Arm7tdmi::get_access_mode(){
+    return (_access_mode)(registers[CPSR].word&0xF);
+    //return ACCESS_MODE; Should I use a global variable? idk
+}
 bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
 {
     _register_type cpsr = registers[CPSR];
@@ -46,21 +57,6 @@ void Arm7tdmi::set_register(Arm7tdmi::_registers reg, uint32_t val)
     registers[reg].word = val;
 }
 
-void Arm7tdmi::set_mode(enum _mode mode)
-{
-    // in ARM state bits [1:0] of R15 are 0 and bits [31:2] contain te PC
-    // in THUMB state bit [0] of R15 is 0 and bits [31:1] contain the PC
-    switch (mode)
-    {
-    case ARM_MODE:
-        registers[R15].word &= 0xFFFFFFFC;
-        break;
-
-    case THUMB_MODE:
-        registers[R15].word &= 0xFFFFFFFE;
-        break;
-    }
-}
 
 // Passing an entire bus is too memory heavy, we need to implement it in another way
 /* If fetching in THUMB_MODE, I have to read only the lower half */

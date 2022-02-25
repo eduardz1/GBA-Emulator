@@ -651,8 +651,22 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction instruction){
     }
 }
 #pragma endregion
+void Arm7tdmi::BX(Arm7tdmi::_instruction instruction){
+    if(!evaluate_cond((_cond)(instruction.cond))){
+        return;
+    }else{
+        //If the first bit of Rn(Rm in our case, and anyway it's the first bit of the instruction) is 1
+        //then the mode gets switched to THUMB_MODE, otherwhise ARM_MODE
+        if(instruction.word&0x1)
+            set_mode(THUMB_MODE);
+        else 
+            set_mode(ARM_MODE);
+        //copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
+        registers[R15].word=registers[(_registers)instruction.Rm].word;
+    }
+
+}
 void Arm7tdmi::B(Arm7tdmi::_instruction instruction, _cond condition){}
-void Arm7tdmi::BX(Arm7tdmi::_instruction instruction){}
 void Arm7tdmi::LDM(Arm7tdmi::_instruction instruction){}
 void Arm7tdmi::LDR(Arm7tdmi::_instruction instruction){}
 void Arm7tdmi::LDRB(Arm7tdmi::_instruction instruction){}

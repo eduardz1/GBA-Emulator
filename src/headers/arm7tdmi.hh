@@ -51,9 +51,24 @@ public: // should be made private
         };
         int32_t word;
     };
+
+    enum _access_mode{
+        USER,
+        FIQ,
+        IRQ,
+        SUPERVISOR,
+        RES1,RES2,RES3,//Reserved. Used only for enum purposes
+        ABORT,
+        RES4,RES5,RES6,RES7,RES8,//Reserved. Used only for enum purposes
+        UNDEFINED,
+        RES9,//Reserved. Used only for enum purposes
+        SYSTEM
+    };
     /*Rd usually is the destination register
       Rn usually is the 1st operand register*/
     std::array<_register_type,NUM>registers;
+    uint8_t ACCESS_MODE=USER;
+
 
     enum _instruction_type{
         DATA_PROCESSING,
@@ -123,11 +138,13 @@ public:
     void decode_executeTHUMB( _instruction instruction);
     void decode_execute( _instruction instruction);
     
-    // set CPU mode with a change in register 15
-    void set_mode(enum _mode mode);
+    _access_mode get_access_mode();
+    void set_access_mode(_access_mode mode);
 
     
     _mode get_mode();
+    void set_mode(enum _mode mode);// set CPU mode with a change in register 15
+
     void set_register(_registers reg, uint32_t val);
 
     bool evaluate_cond(_cond condition);
