@@ -1,690 +1,814 @@
-#include "arm7tdmi.hh"
+#include "headers/arm7tdmi.hh"
 using namespace cpu;
-#pragma region //ALU OPERATIONS
-void Arm7tdmi::ADDS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+// TODO: check for carry flag
+// FIXME: implement "ADD" style code in the other ALU functions
+#pragma region // ALU OPERATIONS
+void Arm7tdmi::ADD(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    uint8_t shift_amount;
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
-        }
-    }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=rn.word+(op2<<shift_amount);
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=rn.word+((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=rn.word+(op2>>shift_amount);
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
-    }
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word + op2;
+
+    // Setting condition flag
+    if(Rd == 0)
+        registers[get_register(CPSR)].Z = 1;
+    else if(Rd < 0)
+        registers[get_register(CPSR)].N = 1;
+    
+    if(Rn.word > 0 && op2 > 0 && Rd <= 0) 
+        registers[get_register(CPSR)].V = 1;
+    else if(Rn.word < 0 && op2 < 0 && Rd >= 0)
+        registers[get_register(CPSR)].V = 1;
 }
 /* Rd = Rn + Op2+ C-bit (ARM32) */
-void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction){
-   if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::ADC(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word+(op2<<shift_amount)+registers[CPSR].C;
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word+((uint32_t)op2>>shift_amount)+registers[CPSR].C;
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word+(op2>>shift_amount)+registers[CPSR].C;
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C;
-            break;
-    }
+
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word + (op2 << shift_amount) + registers[get_register(CPSR)].C;
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word + ((uint32_t)op2 >> shift_amount) + registers[get_register(CPSR)].C;
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word + (op2 >> shift_amount) + registers[get_register(CPSR)].C;
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word + ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) + registers[get_register(CPSR)].C;
+        break;
     }
 }
-void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-     _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::AND(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word&(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word&((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word&(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-    // Rd:= Op1 AND NOT Op2
-void Arm7tdmi::BICS(Arm7tdmi::_instruction instruction){
-   if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+// Rd:= Op1 AND NOT Op2
+void Arm7tdmi::BICS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word&~(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word&~((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word&~(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word&~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ~(op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ~((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ~(op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ~((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-void Arm7tdmi::EORS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::EORS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word^(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word^((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word^(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word^((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word ^ (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word ^ ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word ^ (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word ^ ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::MULS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word*(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word*((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word*(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word*((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-//Rd:= NOT Op2
-void Arm7tdmi::MVNS(Arm7tdmi::_instruction instruction){
-   if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+// Rd:= NOT Op2
+void Arm7tdmi::MVNS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=~(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=~((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=~(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=~((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = ~(op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = ~((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = ~(op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = ~((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::ORRS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word|(op2<<shift_amount);
-            break;
-        case LR:
-           registers[(_registers)instruction.Rd].word=rn.word|((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-           registers[(_registers)instruction.Rd].word=rn.word|(op2>>shift_amount);
-            break;
-        case RR:
-           registers[(_registers)instruction.Rd].word=rn.word|((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word | (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word | ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word | (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word | ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-void Arm7tdmi::SUBS(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::SUBS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-           registers[(_registers)instruction.Rd].word=rn.word-(op2<<shift_amount);
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=rn.word-((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=rn.word-(op2>>shift_amount);
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-void Arm7tdmi::SBCS(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::SBCS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=rn.word-(op2<<shift_amount)+registers[CPSR].C - 1;
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=rn.word-((uint32_t)op2>>shift_amount)+registers[CPSR].C - 1;
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=rn.word-(op2>>shift_amount)+registers[CPSR].C - 1;
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)))+registers[CPSR].C - 1;
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - (op2 << shift_amount) + registers[get_register(CPSR)].C - 1;
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - ((uint32_t)op2 >> shift_amount) + registers[get_register(CPSR)].C - 1;
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - (op2 >> shift_amount) + registers[get_register(CPSR)].C - 1;
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word - ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) + registers[get_register(CPSR)].C - 1;
+        break;
     }
 }
-//Reverse Sub  RSB - Rd:= Op2 - Op1
-void Arm7tdmi::RSB(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+// Reverse Sub  RSB - Rd:= Op2 - Op1
+void Arm7tdmi::RSB(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=(op2<<shift_amount) - rn.word;
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount) - rn.word;
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=(op2>>shift_amount) - rn.word;
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word;
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = (op2 << shift_amount) - rn.word;
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = ((uint32_t)op2 >> shift_amount) - rn.word;
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = (op2 >> shift_amount) - rn.word;
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) - rn.word;
+        break;
     }
 }
-void Arm7tdmi::RSC(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
+void Arm7tdmi::RSC(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=(op2<<shift_amount) - rn.word +registers[CPSR].C - 1;
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount) - rn.word + registers[CPSR].C - 1;
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=(op2>>shift_amount) - rn.word +registers[CPSR].C - 1;
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount))) - rn.word +registers[CPSR].C - 1;
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = (op2 << shift_amount) - rn.word + registers[get_register(CPSR)].C - 1;
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = ((uint32_t)op2 >> shift_amount) - rn.word + registers[get_register(CPSR)].C - 1;
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = (op2 >> shift_amount) - rn.word + registers[get_register(CPSR)].C - 1;
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) - rn.word + registers[get_register(CPSR)].C - 1;
+        break;
     }
 }
-//Like ADD(with S flag) but it doesnt write in the register. It sets only the condition flags
-void Arm7tdmi::CMN(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
-   int32_t tmp;
+// Like ADD(with S flag) but it doesnt write in the register. It sets only the condition flags
+void Arm7tdmi::CMN(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+    int32_t tmp;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            tmp=rn.word+(op2<<shift_amount);
-            break;
-        case LR:
-            tmp=rn.word+((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            tmp=rn.word+(op2>>shift_amount);
-            break;
-        case RR:
-            tmp=rn.word+((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        tmp = rn.word + (op2 << shift_amount);
+        break;
+    case LR:
+        tmp = rn.word + ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        tmp = rn.word + (op2 >> shift_amount);
+        break;
+    case RR:
+        tmp = rn.word + ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-//Like SUB(with S flag) but it doesnt write in the register. It sets only the condition flags
-void Arm7tdmi::CMP(Arm7tdmi::_instruction instruction){
-     if(evaluate_cond((_cond)instruction.cond))//if the condition evaluates to true, then I execute the instruction
-    { 
-    _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
-   int32_t tmp;
+// Like SUB(with S flag) but it doesnt write in the register. It sets only the condition flags
+void Arm7tdmi::CMP(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+    int32_t tmp;
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            tmp=rn.word-(op2<<shift_amount);
-            break;
-        case LR:
-            tmp=rn.word-((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            tmp=rn.word-(op2>>shift_amount);
-            break;
-        case RR:
-            tmp=rn.word-((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        tmp = rn.word - (op2 << shift_amount);
+        break;
+    case LR:
+        tmp = rn.word - ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        tmp = rn.word - (op2 >> shift_amount);
+        break;
+    case RR:
+        tmp = rn.word - ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
-//Like EOR(with S flag) but it doesnt write in the register. It sets only the condition flags
-void Arm7tdmi::TEQ(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
-   int32_t tmp;
+// Like EOR(with S flag) but it doesnt write in the register. It sets only the condition flags
+void Arm7tdmi::TEQ(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
 
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+    int32_t tmp;
 
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            tmp=rn.word^(op2<<shift_amount);
-            break;
-        case LR:
-            tmp=rn.word^((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            tmp=rn.word^(op2>>shift_amount);
-            break;
-        case RR:
-            tmp=rn.word^((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
+    switch (shift_type)
+    {
+    case LL:
+        tmp = rn.word ^ (op2 << shift_amount);
+        break;
+    case LR:
+        tmp = rn.word ^ ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        tmp = rn.word ^ (op2 >> shift_amount);
+        break;
+    case RR:
+        tmp = rn.word ^ ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
+}
+// Like AND(with S flag) but it doesnt write in the register. It sets only the condition flags
+void Arm7tdmi::TST(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
+
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+    int32_t tmp;
+
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
     }
-} 
-//Like AND(with S flag) but it doesnt write in the register. It sets only the condition flags
-void Arm7tdmi::TST(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
-   int32_t tmp;
-
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
-
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=rn.word&(op2<<shift_amount);
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=rn.word&((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=rn.word&(op2>>shift_amount);
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=rn.word&((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word & ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
+}
+void Arm7tdmi::MOVS(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
+
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
     }
-} 
-void Arm7tdmi::MOVS(Arm7tdmi::_instruction instruction){
-    if(evaluate_cond((_cond)(instruction.cond))){
-       _register_type rd,rn;
-   int32_t op2;
-   uint8_t shift_amount=0;
-   _shift shift_type;
-
-    rd=registers[(_registers)(instruction.Rd)];
-    rn=registers[(_registers)(instruction.Rn)];
-    shift_type=(_shift)((instruction.word>>5) &0x2);//isolating bit[5:6] to determine the type of shift
-
-    if((instruction.opcode_id2&0x2)==0x2){//bit[25] aka I flag is set
-        op2=instruction.word&0xFF;
-    }else{//No immediate operand(bit[25]/I flag unset)
-        op2=registers[(_registers)(instruction.Rm)].word;
-        if((instruction.word&0x10)==0x10){//bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount=(instruction.word>>8)&0xF;//isolating bit[8:11]
-        }else{//bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount=(instruction.word>>7)&0x1F;//isolating bit[7:11]
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
         }
     }
-    switch(shift_type){
-        case LL:
-            registers[(_registers)instruction.Rd].word=(op2<<shift_amount);
-            break;
-        case LR:
-            registers[(_registers)instruction.Rd].word=((uint32_t)op2>>shift_amount);
-            break;
-        case AR:
-            registers[(_registers)instruction.Rd].word=(op2>>shift_amount);
-            break;
-        case RR:
-            registers[(_registers)instruction.Rd].word=((op2>>shift_amount)|(op2 <<(32-shift_amount)));
-            break;
-    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
     }
 }
 #pragma endregion
-void Arm7tdmi::BX(Arm7tdmi::_instruction instruction){
-    if(!evaluate_cond((_cond)(instruction.cond))){
+
+void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)(ins.cond)))
         return;
-    }else{
-        //If the first bit of Rn(Rm in our case, and anyway it's the first bit of the instruction) is 1
-        //then the mode gets switched to THUMB_MODE, otherwhise ARM_MODE
-        if(instruction.word&0x1)
-            set_mode(THUMB_MODE);
-        else 
-            set_mode(ARM_MODE);
-        //copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
-        registers[R15].word=registers[(_registers)instruction.Rm].word;
-    }
 
+    // If the first bit of Rn(Rm in our case, and anyway it's the first bit of the instruction) is 1
+    // then the mode gets switched to THUMB_MODE, otherwhise ARM_MODE
+    if (ins.word & 0x1)
+        set_mode(THUMB_MODE);
+    else
+        set_mode(ARM_MODE);
+    // copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
+    registers[get_register(R15)].word = registers[get_register((_registers)ins.Rm)].word;
 }
-void Arm7tdmi::B(Arm7tdmi::_instruction instruction, _cond condition){}
-void Arm7tdmi::LDM(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::LDR(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::LDRB(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::LDRH(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::LDRSB(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::LDRSH(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::MLA(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::MRS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::MSR(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::SMLAL(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::SMULL(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::STM(Arm7tdmi::_instruction instruction){} 
-void Arm7tdmi::STR(Arm7tdmi::_instruction instruction){} 
-void Arm7tdmi::STRB(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::STRH(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::SWI(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::SWP(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::SWPB(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::UMLAL(Arm7tdmi::_instruction instruction){} 
-void Arm7tdmi::UMULL(Arm7tdmi::_instruction instruction){} 
-
+void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {}
+void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRH(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRSB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRSH(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::MLA(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::MRS(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::MSR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRH(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWI(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWP(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWPB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {}

@@ -1,4 +1,4 @@
-#include "arm7tdmi.hh"
+#include "headers/arm7tdmi.hh"
 using namespace cpu;
 // Rd = Rd + Rs + C-bit (THUMB)
 
@@ -14,8 +14,7 @@ void Arm7tdmi::LSL(Arm7tdmi::_instruction ins)
 
     Rd = registers[(_registers)(ins.halfword_lo & 0x7)];
     Rs = registers[(_registers)((ins.halfword_lo >> 3) & 0x7)];
-    //set_register((_registers)Rd.word, (Rs.word << (val)));
-    Rd.word=Rs.word <<(val);
+    set_register((_registers)Rd.word, (Rs.word << (val)));
 }
 
 /**
@@ -30,8 +29,7 @@ void Arm7tdmi::LSR(Arm7tdmi::_instruction ins)
 
     Rd = registers[(_registers)(ins.halfword_lo & 0x7)];
     Rs = registers[(_registers)((ins.halfword_lo >> 3) & 0x7)];
-    //set_register((_registers)Rd.word, (Rs.word << (val)));
-    Rd.word=Rs.word <<(val);
+    set_register((_registers)Rd.word, (Rs.word << (val)));
 }
 
 void Arm7tdmi::NEG(Arm7tdmi::_instruction instruction)
@@ -56,8 +54,7 @@ void Arm7tdmi::ASR(Arm7tdmi::_instruction ins)
     Rd = registers[(_registers)(ins.halfword_lo & 0x7)];
     Rs = registers[(_registers)((ins.halfword_lo >> 3) & 0x7)];
     sign = Rs.word & 0x80000000;
-    //set_register((_registers)Rd.word, ((Rs.word >> (val)) | sign));
-    Rd.word = ((Rs.word >> (val)) | sign);
+    set_register((_registers)Rd.word, ((Rs.word >> (val)) | sign));
 }
 
 /**
@@ -78,8 +75,7 @@ void Arm7tdmi::SUBS(Arm7tdmi::_instruction ins)
     else
         registers[(_registers)((ins.halfword_lo >> 6) & 0x7)].word;
             
-    //set_register((_registers)Rd.word, (Rs.word - Rn_Offset3));
-    Rd.word = (Rs.word - Rn_Offset3);
+    set_register((_registers)Rd.word, (Rs.word - Rn_Offset3));
 }
 
 void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction)
@@ -107,7 +103,7 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction ins) // NEED TO IMPLEMENT LATER IN A 
     if(ins.halfword_lo & 0x0400) // Check flag I
         Rn_Offset3 = ((ins.halfword_lo >> 6) & 0x7);
     else
-        registers[(_registers)((ins.halfword_lo >> 6) & 0x7)].word;
+        Rn_Offset3 = registers[(_registers)((ins.halfword_lo >> 6) & 0x7)].word;
             
     //set_register((_registers)Rd.word, (Rs.word + Rn_Offset3));
     Rd.word = (Rs.word + Rn_Offset3);

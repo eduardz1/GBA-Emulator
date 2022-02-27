@@ -7,7 +7,7 @@ Arm7tdmi::Arm7tdmi(){
     std::cout<<"After cambio"<<(uint)registers[CPSR].word<<std::endl;*/
 }
 
-Arm7tdmi::~Arm7tdmi(){ }
+Arm7tdmi::~Arm7tdmi(){}
 
 Arm7tdmi::_mode Arm7tdmi::get_mode()
 {
@@ -16,32 +16,141 @@ Arm7tdmi::_mode Arm7tdmi::get_mode()
     return registers[R15].word & 0x00000003 ? THUMB_MODE : ARM_MODE;
 }
 
+/**
+ * @brief returns the register corresponding to the
+ * mode the system is in (FIQ, IRQ, ecc...)
+ * 
+ * @param id 4/3 bit identifier of the register we are trying to access
+ */
+Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
+{
+    _access_mode mode = get_access_mode();
+    switch(mode)
+    {
+    case SYS: case USR: return id;
+    case FIQ: {
+        switch(id)
+        {
+        case R8: return R8_fiq;
+        case R9: return R9_fiq;
+        case R10: return R10_fiq;
+        case R11: return R11_fiq;
+        case R12: return R12_fiq;
+        case R13: return R13_fiq;
+        case R14: return R14_fiq;
+        case CPSR: return SPSR_fiq;
+        default: return id;
+        }
+    }
+    case IRQ: {
+        switch(id)
+        {
+        case R13: return R13_irq;
+        case R14: return R14_irq;
+        case CPSR: return SPSR_irq;
+        default: return id;
+        }
+    }
+    case SVC: {
+        switch(id)
+        {
+        case R13: return R13_svc;
+        case R14: return R14_svc;
+        case CPSR: return SPSR_svc;
+        default: return id;
+        }
+    }
+    case ABT: {
+        switch(id)
+        {
+        case R13: return R13_abt;
+        case R14: return R14_abt;
+        case CPSR: return SPSR_abt;
+        default: return id;
+        }
+    }
+    case UND: {
+        switch(id)
+        {
+        case R13: return R13_und;
+        case R14: return R14_und;
+        case CPSR: return SPSR_und;
+        default: return id;
+        }
+    }
+
+    default: return id; // Warning line that never runs
+    }
+}
 
 void Arm7tdmi::set_mode(enum _mode mode)
 {
     // in ARM state bits [1:0] of R15 are 0 and bits [31:2] contain te PC
     // in THUMB state bit [0] of R15 is 0 and bits [31:1] contain the PC
-    ACCESS_MODE=mode;
+    switch (mode)
+    {
+    case ARM_MODE:
+        registers[R15].word &= 0xFFFFFFFC;
+        break;
+
+    case THUMB_MODE:
+        registers[R15].word &= 0xFFFFFFFE;
+        break;
+    }
 }
 /*Not sure if the current mode I am in has to be taken into account when fetching the new mode
   Aka, should the mode be got in the SPSR_svc register if i am in the supervisor register?*/
 Arm7tdmi::_access_mode Arm7tdmi::get_access_mode(){
-    return (_access_mode)(registers[CPSR].word&0xF);
-    //return ACCESS_MODE; Should I use a global variable? idk
+    return (_access_mode)(registers[CPSR].word & 0xF);
 }
+
+/**
+ * @brief based on [I] flag, assigns second operand either
+ * to an immediate value (I set) or to the content of the register
+ * pointed by op2. Shifts the result as specified by the instruction
+ * 
+ * @param type type of shift performed
+ * @param ins instruction
+ * @return second operand  
+ */
+int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
+{
+    uint8_t shift;
+    int32_t op2;
+    
+    if ((ins.opcode_id2 & 0x2) == 0x2) // bit[25] aka I flag is set
+    { 
+        op2 = ins.word & 0xFF;
+        shift = (ins.word & 0xF00) >> 7; // double the "rotate" field value
+        op2 = ((op2 >> shift) | (op2 << (32 - shift)));
+    }
+    else // No immediate operand(bit[25]/I flag unset)
+    {
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        shift = (ins.word & 0x10) ? 
+                (ins.word >> 8) & 0xF : // [4] set -> shift amount specified by the bottom byte of Rs
+                (ins.word >> 7) & 0x1F; // [4] clear -> shift amount is a 5 bit unsigned integer
+        op2 = type == LL ? (op2 << shift) :
+              type == LR ? ((uint32_t)op2 >> shift) :
+              type == AR ? (op2 >> shift) :
+              /* shift == RR? */ ((op2 >> shift) | (op2 << (32 - shift)));
+    }
+    return op2;
+}
+
 bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
 {
     _register_type cpsr = registers[CPSR];
     switch(condition)
     {
-    case EQ: return cpsr.Z==1;// Z set
-    case NE: return cpsr.Z==0;// Z clear
-    case CS: return cpsr.C==1;// C set
-    case CC: return cpsr.C==0;// C clear
-    case MI: return cpsr.N==1;// N set
-    case PL: return cpsr.N==0;// N clear
-    case VS: return cpsr.V==1;// V set
-    case VC: return cpsr.V==0;// V clear
+    case EQ: return cpsr.Z; // Z set
+    case NE: return !cpsr.Z;// Z clear
+    case CS: return cpsr.C; // C set
+    case CC: return !cpsr.C;// C clear
+    case MI: return cpsr.N; // N set
+    case PL: return !cpsr.N;// N clear
+    case VS: return cpsr.V; // V set
+    case VC: return !cpsr.V;// V clear
     case HI: return cpsr.C && !cpsr.Z; // C set && Z clear
     case LS: return !cpsr.C || cpsr.Z; // C clear || Z set
     case GE: return cpsr.N == cpsr.V;
@@ -49,6 +158,8 @@ bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
     case GT: return !cpsr.Z && (cpsr.N == cpsr.V);
     case LE: return cpsr.Z || (cpsr.N != cpsr.V);
     case AL: return true;
+
+    default: return true; // warning line that never runs
     }
 }
 

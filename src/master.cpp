@@ -21,13 +21,13 @@ int main()
     //std::cout << "Valore:" << (uint)su << std::endl;
 
     for(int i=prova.BIOS_ROM.min_range;i<prova.BIOS_ROM.max_range;i = i+4){
-        cpu::Arm7tdmi::_instruction tmp;
-        tmp.word  = prova.RAM[i];
-        tmp.word |= prova.RAM[i + 1] << 8;
-        tmp.word |= prova.RAM[i + 2] << 16;
-        tmp.word |= prova.RAM[i + 3] << 24;
+        // cpu::Arm7tdmi::_instruction tmp;
+        // tmp.word  = prova.RAM[i];
+        // tmp.word |= prova.RAM[i + 1] << 8;
+        // tmp.word |= prova.RAM[i + 2] << 16;
+        // tmp.word |= prova.RAM[i + 3] << 24;
 
-        cpu.decode_execute(tmp);
+        // cpu.decode_execute(tmp);
     }
     /*cpu::Arm7tdmi::_instruction tmp;
     tmp.word=0xE3A000DF;
