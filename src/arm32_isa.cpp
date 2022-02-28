@@ -5,28 +5,17 @@ using namespace cpu;
 #pragma region // ALU OPERATIONS
 void Arm7tdmi::ADD(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
-        return; // if the condition evaluates to true, then I execute the instruction
+    if (!evaluate_cond((_cond)ins.cond)) return;
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register((_registers)(ins.Rn))];
-    uint8_t shift_amount;
-    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word + op2;
-
-    // Setting condition flag
-    if(Rd == 0)
-        registers[get_register(CPSR)].Z = 1;
-    else if(Rd < 0)
-        registers[get_register(CPSR)].N = 1;
-    
-    if(Rn.word > 0 && op2 > 0 && Rd <= 0) 
-        registers[get_register(CPSR)].V = 1;
-    else if(Rn.word < 0 && op2 < 0 && Rd >= 0)
-        registers[get_register(CPSR)].V = 1;
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
+
 /* Rd = Rn + Op2+ C-bit (ARM32) */
 void Arm7tdmi::ADC(Arm7tdmi::_instruction ins)
 {

@@ -27,7 +27,6 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
     _access_mode mode = get_access_mode();
     switch(mode)
     {
-    case SYS: case USR: return id;
     case FIQ: {
         switch(id)
         {
@@ -38,7 +37,7 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
         case R12: return R12_fiq;
         case R13: return R13_fiq;
         case R14: return R14_fiq;
-        case CPSR: return SPSR_fiq;
+        //case CPSR: return SPSR_fiq;
         default: return id;
         }
     }
@@ -47,7 +46,7 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
         {
         case R13: return R13_irq;
         case R14: return R14_irq;
-        case CPSR: return SPSR_irq;
+        //case CPSR: return SPSR_irq;
         default: return id;
         }
     }
@@ -56,7 +55,7 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
         {
         case R13: return R13_svc;
         case R14: return R14_svc;
-        case CPSR: return SPSR_svc;
+        //case CPSR: return SPSR_svc;
         default: return id;
         }
     }
@@ -65,7 +64,7 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
         {
         case R13: return R13_abt;
         case R14: return R14_abt;
-        case CPSR: return SPSR_abt;
+        //case CPSR: return SPSR_abt;
         default: return id;
         }
     }
@@ -74,13 +73,87 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
         {
         case R13: return R13_und;
         case R14: return R14_und;
-        case CPSR: return SPSR_und;
+        //case CPSR: return SPSR_und;
         default: return id;
         }
     }
-
-    default: return id; // Warning line that never runs
+    default: return id; // SYS/USR
     }
+}
+
+/**
+ * @brief On entry:
+ * 1a - Preserves the address of the next instruction in the appropriate
+ *     Link Register, next instruction is specified by the offset parameter
+ * \n
+ * 2a - Copies CPSR into the appropriate SPSR
+ * 3a - Forces the CPSR mode bits to a value which depends on the exception
+ * 4a - Forces the PC to fetch the next instruction from the relevant exception vector
+ * Entering from THUMB state forces a switch into ARM state when PC is loeaded 
+ * with the exception vector address
+ * 
+ * On completion:
+ * 1b - Moves the Link Register, minus an offset where appropriate, to the PC
+ * 2b - Copies SPSR back to CPSR
+ * 3b - Clears the interrupt disable flags, if they were set on entry
+ */
+void Arm7tdmi::exception_handler(/* _exceptions EXC */)
+{
+    /*
+     * offset value is 4 or 8 (bytes) depending on the exception when entering from ARM
+     * state, in THUMB the exception handler is responsible for choosing an offset
+     * such that the program resumes from the correct place on return from an exception
+     */
+    uint8_t offset;
+    _registers link = get_register(R14);
+    _registers PC = get_register(R15); // program counter
+    _registers SPSR;
+
+    if(get_mode() == ARM_MODE)
+    {
+        // 1a
+    }
+    else // THUMB_MODE
+    {
+        // 1a
+    }
+    // 2a
+    switch(get_access_mode())
+    {
+    case FIQ: SPSR = SPSR_fiq; break;
+    case IRQ: SPSR = SPSR_irq; break;
+    case SVC: SPSR = SPSR_svc; break;
+    case ABT: SPSR = SPSR_abt; break;
+    case UND: SPSR = SPSR_und; break;
+    default : SPSR = CPSR; break; // SYS/USR
+    }
+    registers[SPSR] = registers[CPSR];
+
+    // 3a - switch(exception){}
+    // 4a - registers[PC] = exceptions[EXC]; with "exceptions" being an array of function pointers
+}
+
+/**
+ * @brief sets/clears Zero (Z), Negative (N), Overflow (V) and Carry (C) flag 
+ * 
+ * @param Rd destination register (result of sum/sub)
+ * @param Rn first operand
+ * @param op2 second operand
+ */
+void Arm7tdmi::set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2)
+{
+    registers[get_register(CPSR)].Z = (Rd == 0) ? 1 : 0;
+    registers[get_register(CPSR)].N = (Rd < 0)  ? 1 : 0;
+
+    if((Rn > 0 && op2 > 0 && Rd <= 0) || (Rn < 0 && op2 < 0 && Rd >= 0)) // if true sets overflow flag
+        registers[get_register(CPSR)].V = 1;
+    else
+        registers[get_register(CPSR)].V = 0;
+
+    if((Rn > 0 || op2 > 0 && Rd <= 0) || (Rn < 0 && op2 < 0 && Rd >= 0)) // if true sets carry flag
+        registers[get_register(CPSR)].V = 1;
+    else
+        registers[get_register(CPSR)].V = 0;
 }
 
 void Arm7tdmi::set_mode(enum _mode mode)

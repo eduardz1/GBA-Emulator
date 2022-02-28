@@ -149,9 +149,11 @@ public:
     bool evaluate_cond(_cond condition);
     _registers get_register(_registers id);
     int32_t get_ALU_op2(_shift type, _instruction ins);
+    void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2);
 
 public:
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
+    void exception_handler();
     
     // ARM instructions
     void ADD(_instruction instruction);
