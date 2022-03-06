@@ -211,7 +211,13 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
     }
     return op2;
 }
-
+/**
+ * @brief Checks,based on the condition, which condition must be evaluated
+ * 
+ * @param condition condition of the instruction(uppermost 4 bits)
+ * @return  true if the condition evaluates to true
+ * @return  false if the condition evaluates to false
+ */
 bool Arm7tdmi::evaluate_cond(Arm7tdmi::_cond condition)
 {
     _register_type cpsr = registers[CPSR];
@@ -251,7 +257,11 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
         else 
             return bus_controller.RAM[R15];
 }
-/*wrapper for decode_executeARM32/THUMB*/
+/**
+ * @brief Wrapper for decode_executeTHUMB and decode_executeARM32
+ * 
+ * @param ins Instruction to be decoded and executed. It can be decoded either in ARM mode or in THUMB mode
+ */
 void Arm7tdmi::decode_execute(Arm7tdmi::_instruction ins)
 {
     // Undef when [25:27] -> 011 && [4] set
