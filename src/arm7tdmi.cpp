@@ -112,6 +112,7 @@ void Arm7tdmi::exception_handler(/* _exceptions EXC */)
     if(get_mode() == ARM_MODE)
     {
         // 1a
+        registers[link].word=registers[PC+4].word;//or +8, still gotta handle that
     }
     else // THUMB_MODE
     {
@@ -151,9 +152,9 @@ void Arm7tdmi::set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2)
         registers[get_register(CPSR)].V = 0;
 
     if((Rn > 0 || op2 > 0 && Rd <= 0) || (Rn < 0 && op2 < 0 && Rd >= 0)) // if true sets carry flag
-        registers[get_register(CPSR)].V = 1;
+        registers[get_register(CPSR)].C = 1;
     else
-        registers[get_register(CPSR)].V = 0;
+        registers[get_register(CPSR)].C = 0;
 }
 
 void Arm7tdmi::set_mode(enum _mode mode)
