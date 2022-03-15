@@ -133,7 +133,7 @@ void Arm7tdmi::exception_handler(/* _exceptions EXC */)
     // 3a - switch(exception){}
     // 4a - registers[PC] = exceptions[EXC]; with "exceptions" being an array of function pointers
 }
-
+/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? */
 /**
  * @brief sets/clears Zero (Z), Negative (N), Overflow (V) and Carry (C) flag 
  * 
