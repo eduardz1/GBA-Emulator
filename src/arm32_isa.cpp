@@ -20,7 +20,7 @@ void Arm7tdmi::ADD(Arm7tdmi::_instruction ins)
 /* Rd = Rn + Op2+ C-bit (ARM32) */
 void Arm7tdmi::ADC(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -64,6 +64,17 @@ void Arm7tdmi::ADC(Arm7tdmi::_instruction ins)
         registers[get_register((_registers)ins.Rd)].word = rn.word + ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) + registers[get_register(CPSR)].C;
         break;
     }
+    */
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word + op2+registers[get_register(CPSR)].C;
+    set_register((_registers)(ins.Rd),Rd);
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 void Arm7tdmi::SUBS(Arm7tdmi::_instruction ins)
 {
@@ -369,7 +380,7 @@ void Arm7tdmi::MULS(Arm7tdmi::_instruction ins)
 // Rd:= NOT Op2
 void Arm7tdmi::MVNS(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+   /* if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -411,11 +422,26 @@ void Arm7tdmi::MVNS(Arm7tdmi::_instruction ins)
     case RR:
         registers[get_register((_registers)ins.Rd)].word = ~((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
-    }
+    }*/
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = ~op2;
+    set_register((_registers)(ins.Rd),Rd);
+    //set_condition_code_flags(Rd, Rn.word, op2);
+    if(Rd == 0){
+        registers[get_register(CPSR)].Z=1;
+    }else if(Rd <0)
+        registers[get_register(CPSR)].N=1;
 }
+
 void Arm7tdmi::ORRS(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+   /* if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -458,10 +484,25 @@ void Arm7tdmi::ORRS(Arm7tdmi::_instruction ins)
         registers[get_register((_registers)ins.Rd)].word = rn.word | ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
     }
+    */
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word | op2;
+    set_register((_registers)(ins.Rd),Rd);
+    //set_condition_code_flags(Rd, Rn.word, op2);
+    if(Rd == 0){
+        registers[get_register(CPSR)].Z=1;
+    }else if(Rd <0)
+        registers[get_register(CPSR)].N=1;
 }
 void Arm7tdmi::SBCS(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -503,12 +544,23 @@ void Arm7tdmi::SBCS(Arm7tdmi::_instruction ins)
     case RR:
         registers[get_register((_registers)ins.Rd)].word = rn.word - ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) + registers[get_register(CPSR)].C - 1;
         break;
-    }
+    }*/
+
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word - op2 + registers[get_register(CPSR)].C - 1;
+    set_register((_registers)(ins.Rd),Rd);
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 // Reverse Sub  RSB - Rd:= Op2 - Op1
 void Arm7tdmi::RSB(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -550,11 +602,21 @@ void Arm7tdmi::RSB(Arm7tdmi::_instruction ins)
     case RR:
         registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) - rn.word;
         break;
-    }
+    }*/
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = op2 - Rn.word;
+    set_register((_registers)(ins.Rd),Rd);
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 void Arm7tdmi::RSC(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -596,12 +658,22 @@ void Arm7tdmi::RSC(Arm7tdmi::_instruction ins)
     case RR:
         registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount))) - rn.word + registers[get_register(CPSR)].C - 1;
         break;
-    }
+    }*/
+     if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = op2 - Rn.word + registers[get_register(CPSR)].C - 1;
+    set_register((_registers)(ins.Rd),Rd);
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 // Like ADD(with S flag) but it doesnt write in the register. It sets only the condition flags
 void Arm7tdmi::CMN(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -644,12 +716,22 @@ void Arm7tdmi::CMN(Arm7tdmi::_instruction ins)
     case RR:
         tmp = rn.word + ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
-    }
+    }*/
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word + op2;
+
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 // Like SUB(with S flag) but it doesnt write in the register. It sets only the condition flags
 void Arm7tdmi::CMP(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
     _register_type rd, rn;
     int32_t op2;
@@ -692,11 +774,22 @@ void Arm7tdmi::CMP(Arm7tdmi::_instruction ins)
         tmp = rn.word - ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
     }
+    */
+   if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word - op2;
+    
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 // Like EOR(with S flag) but it doesnt write in the register. It sets only the condition flags
 void Arm7tdmi::TEQ(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -740,11 +833,22 @@ void Arm7tdmi::TEQ(Arm7tdmi::_instruction ins)
         tmp = rn.word ^ ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
     }
+    */
+   if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word ^ op2;
+    
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 // Like AND(with S flag) but it doesnt write in the register. It sets only the condition flags
 void Arm7tdmi::TST(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -788,10 +892,21 @@ void Arm7tdmi::TST(Arm7tdmi::_instruction ins)
         registers[get_register((_registers)ins.Rd)].word = rn.word & ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
     }
+    */
+    if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = Rn.word & op2;
+    
+    set_condition_code_flags(Rd, Rn.word, op2);
 }
 void Arm7tdmi::MOVS(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)ins.cond))
+    /*if (!evaluate_cond((_cond)ins.cond))
         return; // if the condition evaluates to true, then I execute the instruction
 
     _register_type rd, rn;
@@ -834,7 +949,18 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction ins)
         registers[get_register((_registers)ins.Rd)].word = ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
         break;
     }
-}
+    */
+   if (!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rn = registers[get_register((_registers)(ins.Rn))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    op2 = get_ALU_op2(shift_type, ins);
+    Rd = op2;
+    
+    set_condition_code_flags(Rd, Rn.word, op2);
+}   
 #pragma endregion
 
 void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
