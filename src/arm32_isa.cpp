@@ -962,7 +962,7 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction ins)
     set_condition_code_flags(Rd, Rn.word, op2);
 }   
 #pragma endregion
-
+#pragma region //Branch Operations
 void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)(ins.cond)))
@@ -977,7 +977,15 @@ void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
     // copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
     registers[get_register(R15)].word = registers[get_register((_registers)ins.Rm)].word;
 }
-void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {}
+void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {
+    if (!evaluate_cond((_cond)(ins.cond))) return;
+    int32_t offset = (ins.word&0x00FFFFFF)<<2;//isolating bit[0:23] and shifting left twice(offset<<2)
+    if(ins.word&0x01000000)//if the Link bit is set(bit[24]), I save the old PC in the link register
+        set_register(R15,registers[get_register(R15)].word);
+    registers[get_register(R14)].word =+ offset;//adding the offset to PC
+    return;
+}
+#pragma endregion
 void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
