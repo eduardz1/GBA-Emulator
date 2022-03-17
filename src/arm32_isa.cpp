@@ -2,7 +2,7 @@
 using namespace cpu;
 // TODO: check for carry flag
 // FIXME: implement "ADD" style code in the other ALU functions
-#pragma region // ALU OPERATIONS
+#pragma region //ALU OPERATIONS
 void Arm7tdmi::ADD(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)ins.cond)) return;
@@ -310,66 +310,6 @@ void Arm7tdmi::EORS(Arm7tdmi::_instruction ins)
 
     op2 = get_ALU_op2(shift_type,ins);
     Rd = Rn.word ^ op2;
-    set_register((_registers)(ins.Rd),Rd);
-    /*TODO: trying to figure out how to compute Carry bit*/
-    if(Rd == 0)
-        registers[get_register(CPSR)].Z=1;
-    else if(Rd <0)
-        registers[get_register(CPSR)].N=1;
-}
-void Arm7tdmi::MULS(Arm7tdmi::_instruction ins)
-{
-    /*if (!evaluate_cond((_cond)ins.cond))
-        return; // if the condition evaluates to true, then I execute the instruction
-
-    _register_type rd, rn;
-    int32_t op2;
-    uint8_t shift_amount = 0;
-    _shift shift_type;
-
-    rd = registers[get_register((_registers)(ins.Rd))];
-    rn = registers[get_register((_registers)(ins.Rn))];
-    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
-
-    if ((ins.opcode_id2 & 0x2) == 0x2)
-    { // bit[25] aka I flag is set
-        op2 = ins.word & 0xFF;
-    }
-    else
-    { // No immediate operand(bit[25]/I flag unset)
-        op2 = registers[get_register((_registers)(ins.Rm))].word;
-        if ((ins.word & 0x10) == 0x10)
-        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
-            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
-        }
-        else
-        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
-            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
-        }
-    }
-    switch (shift_type)
-    {
-    case LL:
-        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 << shift_amount);
-        break;
-    case LR:
-        registers[get_register((_registers)ins.Rd)].word = rn.word * ((uint32_t)op2 >> shift_amount);
-        break;
-    case AR:
-        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 >> shift_amount);
-        break;
-    case RR:
-        registers[get_register((_registers)ins.Rd)].word = rn.word * ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
-        break;
-    }*/
-    if(!evaluate_cond((_cond)ins.cond)) return;
-
-    int32_t op2, Rd;
-    _register_type Rm = registers[get_register((_registers)(ins.Rm))];
-    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
-    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
-
-    Rd = Rm.word * Rs.word;
     set_register((_registers)(ins.Rd),Rd);
     /*TODO: trying to figure out how to compute Carry bit*/
     if(Rd == 0)
@@ -962,6 +902,73 @@ void Arm7tdmi::MOVS(Arm7tdmi::_instruction ins)
     set_condition_code_flags(Rd, Rn.word, op2);
 }   
 #pragma endregion
+#pragma region //Mul operations
+void Arm7tdmi::MULS(Arm7tdmi::_instruction ins)
+{
+    /*if (!evaluate_cond((_cond)ins.cond))
+        return; // if the condition evaluates to true, then I execute the instruction
+
+    _register_type rd, rn;
+    int32_t op2;
+    uint8_t shift_amount = 0;
+    _shift shift_type;
+
+    rd = registers[get_register((_registers)(ins.Rd))];
+    rn = registers[get_register((_registers)(ins.Rn))];
+    shift_type = (_shift)((ins.word >> 5) & 0x2); // isolating bit[5:6] to determine the type of shift
+
+    if ((ins.opcode_id2 & 0x2) == 0x2)
+    { // bit[25] aka I flag is set
+        op2 = ins.word & 0xFF;
+    }
+    else
+    { // No immediate operand(bit[25]/I flag unset)
+        op2 = registers[get_register((_registers)(ins.Rm))].word;
+        if ((ins.word & 0x10) == 0x10)
+        {                                         // bit[4] set -> shift amount specified by the bottom byte of Rs
+            shift_amount = (ins.word >> 8) & 0xF; // isolating bit[8:11]
+        }
+        else
+        {                                          // bit[4] unset -> shift amount is a 5 bit unsigned integer
+            shift_amount = (ins.word >> 7) & 0x1F; // isolating bit[7:11]
+        }
+    }
+    switch (shift_type)
+    {
+    case LL:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 << shift_amount);
+        break;
+    case LR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * ((uint32_t)op2 >> shift_amount);
+        break;
+    case AR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * (op2 >> shift_amount);
+        break;
+    case RR:
+        registers[get_register((_registers)ins.Rd)].word = rn.word * ((op2 >> shift_amount) | (op2 << (32 - shift_amount)));
+        break;
+    }*/
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t op2, Rd;
+    _register_type Rm = registers[get_register((_registers)(ins.Rm))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    Rd = Rm.word * Rs.word;
+    set_register((_registers)(ins.Rd),Rd);
+    /*TODO: trying to figure out how to compute Carry bit*/
+    if(Rd == 0)
+        registers[get_register(CPSR)].Z=1;
+    else if(Rd <0)
+        registers[get_register(CPSR)].N=1;
+}
+void Arm7tdmi::MLA(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {}
+#pragma endregion
 #pragma region //Branch Operations
 void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
 {
@@ -988,21 +995,17 @@ void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {
 #pragma endregion
 void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRH(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRSB(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRSH(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::MLA(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::MRS(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::MSR(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STRH(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SWI(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SWP(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SWPB(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {}
+
