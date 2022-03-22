@@ -119,7 +119,7 @@ void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
             /*Calcolo dell'operand 2 che non ho voglia di fare perchè mi hai detto di fare prima la thumb xd*/
 }
 // void Arm7tdmi::MOVS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::EORS(Arm7tdmi::_instruction instruction){
+void Arm7tdmi::EOR_a(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.halfword_lo&0xF)];
     rn=registers[(_registers)((instruction.halfword_lo>>4)&0xF)];//rn is rs in THUMB
@@ -135,7 +135,7 @@ void Arm7tdmi::ROR(Arm7tdmi::_instruction instruction)
     rd.word = (rd.word >> rn.word) | (rd.word << (32 - rn.word));
 }
 // void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::MULS(Arm7tdmi::_instruction instruction){
+void Arm7tdmi::MUL_a(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.halfword_lo&0xF)];
     rn=registers[(_registers)((instruction.halfword_lo>>4)&0xF)];//rn is rs in THUMB

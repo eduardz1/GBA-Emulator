@@ -133,18 +133,21 @@ void Arm7tdmi::exception_handler(/* _exceptions EXC */)
     // 3a - switch(exception){}
     // 4a - registers[PC] = exceptions[EXC]; with "exceptions" being an array of function pointers
 }
-/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? */
+/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? Probably yes */
 /**
  * @brief sets/clears Zero (Z), Negative (N), Overflow (V) and Carry (C) flag 
  * 
  * @param Rd destination register (result of sum/sub)
  * @param Rn first operand
  * @param op2 second operand
+ * @param overflowable set to "true" if the operation can cause an overflow
  */
-void Arm7tdmi::set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2)
+void Arm7tdmi::set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2, bool overflowable)
 {
     registers[get_register(CPSR)].Z = (Rd == 0) ? 1 : 0;
     registers[get_register(CPSR)].N = (Rd < 0)  ? 1 : 0;
+
+    if(!overflowable) return;
 
     if((Rn > 0 && op2 > 0 && Rd <= 0) || (Rn < 0 && op2 < 0 && Rd >= 0)) // if true sets overflow flag
         registers[get_register(CPSR)].V = 1;
@@ -298,8 +301,8 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         {
         case 0x10: case 0x11: case 0x12: case 0x13: 
         case 0x14: case 0x15: case 0x16: case 0x17: ASR(ins);  break; // 0001 0xxx
-        case 0x18: case 0x19: case 0x1C: case 0x1D: ADD(ins); break; // 0001 1x0x
-        case 0x1A: case 0x1B: case 0x1E: case 0x1F: SUB(ins); break; // 0001 1x1x
+        case 0x18: case 0x19: case 0x1C: case 0x1D: ADD_a(ins); break; // 0001 1x0x
+        case 0x1A: case 0x1B: case 0x1E: case 0x1F: SUB_a(ins); break; // 0001 1x1x
         }
         break;
     }
@@ -309,7 +312,7 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         case 0x20: case 0x21: case 0x22: case 0x23:
         case 0x24: case 0x25: case 0x26: case 0x27: MOV(ins); break; // 0010 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
-        case 0x2A: case 0x2B: case 0x2E: case 0x2F: CMP(ins); break;  // 0010 1xxx
+        case 0x2A: case 0x2B: case 0x2E: case 0x2F: CMP_a(ins); break;  // 0010 1xxx
         }
         break;
     }
@@ -317,9 +320,9 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         switch(hi_byte)
         {
         case 0x20: case 0x21: case 0x22: case 0x23:
-        case 0x24: case 0x25: case 0x26: case 0x27: ADD(ins); break; // 0011 0xxx
+        case 0x24: case 0x25: case 0x26: case 0x27: ADD_a(ins); break; // 0011 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
-        case 0x2A: case 0x2B: case 0x2E: case 0x2F: SUB(ins); break; // 0011 1xxx
+        case 0x2A: case 0x2B: case 0x2E: case 0x2F: SUB_a(ins); break; // 0011 1xxx
         }
         break;
     }
@@ -329,29 +332,29 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         case 0x0: { // ALU operations
             switch((ins.halfword_lo & 0x03C0) >> 6) // isolate opcode
             {
-            case 0x0: AND(ins); break;
+            case 0x0: AND_a(ins); break;
             case 0x1: EOR(ins); break;
             case 0x2: LSL(ins); break;
             case 0x3: LSR(ins); break;
             case 0x4: ASR(ins); break;
-            case 0x5: ADC(ins); break;
+            case 0x5: ADC_a(ins); break;
             case 0x6: SBC(ins); break;
             case 0x7: ROR(ins); break;
-            case 0x8: TST(ins); break;
+            case 0x8: TST_a(ins); break;
             case 0x9: NEG(ins); break;
-            case 0xA: CMP(ins); break;
-            case 0xB: CMN(ins); break;
+            case 0xA: CMP_a(ins); break;
+            case 0xB: CMN_a(ins); break;
             case 0xC: ORR(ins); break;
             case 0xD: MUL(ins); break;
-            case 0xE: BIC(ins); break;
+            case 0xE: BIC_a(ins); break;
             case 0xF: MVN(ins); break;
             }
         }  
         case 0x1: { // High Register operations/Branch Exchange
             switch(hi_byte & 0x03) // isolate opcode
             {
-            case 0x0: ADD(ins); break;
-            case 0x1: CMP(ins); break;
+            case 0x0: ADD_a(ins); break;
+            case 0x1: CMP_a(ins); break;
             case 0x2: MOV(ins); break;
             case 0x3:
                 if (ins.halfword_lo & 0x0080) // H0[0]
@@ -402,12 +405,12 @@ void Arm7tdmi::decode_executeTHUMB(Arm7tdmi::_instruction ins)
         else 
             LDR(ins); 
         break;  
-    case 0xA: ADD(ins); break; // Load Address
+    case 0xA: ADD_a(ins); break; // Load Address
     case 0xB: {
         switch(hi_byte)
         {   // Add Offset to Stack Pointer
-        case 0xB0: ADD(ins); break;
-        case 0xB1: SUB(ins); break;
+        case 0xB0: ADD_a(ins); break;
+        case 0xB1: SUB_a(ins); break;
             // Push/Pop Registers
         case 0xB4: case 0xB5: PUSH(ins); break;
         case 0xBA: case 0xBB: POP(ins); break;
@@ -461,16 +464,16 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
             switch(opcode)
             {
             case 0x0: ANDS(ins); break;
-            case 0x1: EORS(ins); break;
+            case 0x1: EOR_a(ins); break;
             case 0x2: SUBS(ins); break;
-            case 0x3: RSB(ins); break;
+            case 0x3: RSB_a(ins); break;
             case 0x4: ADDS(ins); break;
             case 0x5: ADCS(ins); break;
-            case 0x6: SBCS(ins); break;
-            case 0x7: RSC(ins); break;
+            case 0x6: SBC_a(ins); break;
+            case 0x7: RSC_a(ins); break;
             case 0x8: {
                     if (ins.opcode_id2 & 0x1) // S[1]
-                        TST(ins);
+                        TST_a(ins);
                     else if ((ins.word & 0x020F0FFF) == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
                         MRS(ins);
                     else
@@ -479,7 +482,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
                 }
             case 0x9: {
                     if (ins.opcode_id2 & 0x1) // S[1]
-                        TEQ(ins);
+                        TEQ_a(ins);
                     else if ((ins.word & 0x0200F000) == 0x0200F000) // I[1] && SBO [12:15]
                         MSR(ins);
                     else if ((ins.word & 0x0200FFF0) == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
@@ -492,7 +495,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
                 }
             case 0xA: {
                     if ((ins.word & 0x0010F000) == 0x00100000) // S[1] && SBZ [12:15]
-                        CMP(ins);
+                        CMP_a(ins);
                     else if ((ins.word & 0x020F0FFF) == 0x000F0000) // I[0] && SBO [16:19] && SBZ [0:11]
                         MRS(ins);
                     else
@@ -501,7 +504,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
                 }
             case 0xB: {
                     if ((ins.word & 0x0010F000) == 0x00100000) // S[1] && SBZ [12:15]
-                        CMN(ins);
+                        CMN_a(ins);
                     else if ((ins.word & 0x0200F000) == 0x0200F000) // I[1] && SBO [12:15]
                         MSR(ins);
                     else if ((ins.word & 0x0200FFF0) == 0x0000F000) // I[0] && SBO [11:15] && SBZ [4:11]
@@ -513,7 +516,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
             case 0xC: ORR(ins); break;
             case 0xD: {
                     if ((ins.word & 0xF0000) == 0x00000) // SBZ [16:19]
-                        MOVS(ins);
+                        MOV_a(ins);
                     else
                         undef(ins);
                     break;
@@ -521,7 +524,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
             case 0xE: BICS(ins); break;
             case 0xF: {
                     if ((ins.word & 0xF0000) == 0x00000) // SBZ [16:19]
-                        MVNS(ins);
+                        MVN_a(ins);
                     else
                         undef(ins);
                     break;
@@ -535,7 +538,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
         case 0x9:
             switch(ins.opcode_id2)
             {   // Multiply       
-            case 0x0: case 0x1: MULS(ins); break;
+            case 0x0: case 0x1: MUL_a(ins); break;
             case 0x2: case 0x3: MLA(ins); break;
                 // Multiply Long
             case 0x8: case 0x9: UMULL(ins); break;
