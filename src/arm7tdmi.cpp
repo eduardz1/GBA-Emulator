@@ -133,7 +133,17 @@ void Arm7tdmi::exception_handler(/* _exceptions EXC */)
     // 3a - switch(exception){}
     // 4a - registers[PC] = exceptions[EXC]; with "exceptions" being an array of function pointers
 }
-/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? Probably yes */
+/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? Probably yes 
+
+    Carry out: 
+       |----lsl = bit[(31-(#bit_shift)+1)]      i.e.  LSL#5 => il carry out sarà il bit[27](28esimo bit dunque)
+	   |
+	   |----lsr = bit[(#bit_shift)-1]	        i.e.  LSR#5 => il carry out sarà il bit[4](quinto bit dunque)
+	   |
+	   |----asr = bit[(#bit_shift)-1]	        i.e.  ASR#5 => il carry out sarà il bit[4](quinto bit dunque)
+       |
+  	   |----ror = bit[(#bit_shift)-1]	        i.e.  ROR#5 => il carry out sarà il bit[4](quinto bit dunque)
+*/
 /**
  * @brief sets/clears Zero (Z), Negative (N), Overflow (V) and Carry (C) flag 
  * 
