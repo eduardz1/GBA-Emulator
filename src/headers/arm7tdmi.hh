@@ -149,21 +149,21 @@ public:
     bool evaluate_cond(_cond condition);
     _registers get_register(_registers id);
     int32_t get_ALU_op2(_shift type, _instruction ins);
-    void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2);
+    void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2, bool overflowable);
 
 public:
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
     void exception_handler();
     
     // ARM instructions
-    void ADD(_instruction instruction);
-    void ADC(_instruction instruction);
-    void AND(_instruction instruction);
+    void ADD_a(_instruction instruction);
+    void ADC_a(_instruction instruction);
+    void AND_a(_instruction instruction);
     void B(_instruction instruction, _cond condition);
-    void BIC(_instruction instruction);
+    void BIC_a(_instruction instruction);
     void BX(_instruction instruction);
-    void CMN(_instruction instruction);
-    void CMP(_instruction instruction);
+    void CMN_a(_instruction instruction);
+    void CMP_a(_instruction instruction);
     void EOR(_instruction instruction);
     void LDM(_instruction instruction);
     void LDR(_instruction instruction);
@@ -178,8 +178,8 @@ public:
     void MUL(_instruction instruction);
     void MVN(_instruction instruction);
     void ORR(_instruction instruction);
-    void RSB(_instruction instruction);
-    void RSC(_instruction instruction);
+    void RSB_a(_instruction instruction);
+    void RSC_a(_instruction instruction);
     void SBC(_instruction instruction);
     void SMLAL(_instruction instruction);
     void SMULL(_instruction instruction);
@@ -187,12 +187,12 @@ public:
     void STR(_instruction instruction); 
     void STRB(_instruction instruction);
     void STRH(_instruction instruction);
-    void SUB(_instruction instruction);
+    void SUB_a(_instruction instruction);
     void SWI(_instruction instruction);
     void SWP(_instruction instruction);
     void SWPB(_instruction instruction);
-    void TEQ(_instruction instruction); 
-    void TST(_instruction instruction); 
+    void TEQ_a(_instruction instruction); 
+    void TST_a(_instruction instruction); 
     void UMLAL(_instruction instruction); 
     void UMULL(_instruction instruction); 
 
@@ -204,15 +204,15 @@ public:
     void ADDS(_instruction instruction);
     void ADCS(_instruction instruction);
     void ANDS(_instruction instruction);
-    void MOVS(_instruction instruction);
-    void EORS(_instruction instruction);
-    void SBCS(_instruction instruction);
+    void MOV_a(_instruction instruction);
+    void EOR_a(_instruction instruction);
+    void SBC_a(_instruction instruction);
     void ROR(_instruction instruction); 
-    void ORRS(_instruction instruction);
+    void ORR_a(_instruction instruction);
     void NEG(_instruction instruction);
-    void MULS(_instruction instruction);
+    void MUL_a(_instruction instruction);
     void BICS(_instruction instruction);
-    void MVNS(_instruction instruction);
+    void MVN_a(_instruction instruction);
     void PUSH(_instruction instruction);
     void POP(_instruction instruction);
     void STMIA(_instruction instruction); 
