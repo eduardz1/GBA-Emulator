@@ -1,4 +1,5 @@
 #include "headers/arm7tdmi.hh"
+#include <cmath>
 
 using namespace cpu;
 Arm7tdmi::Arm7tdmi(){
@@ -133,17 +134,7 @@ void Arm7tdmi::exception_handler(/* _exceptions EXC */)
     // 3a - switch(exception){}
     // 4a - registers[PC] = exceptions[EXC]; with "exceptions" being an array of function pointers
 }
-/*FIXME: Shouldn't carry bit be computed according to the barrel shifter? Probably yes 
 
-    Carry out: 
-       |----lsl = bit[(31-(#bit_shift)+1)]      i.e.  LSL#5 => il carry out sarà il bit[27](28esimo bit dunque)
-	   |
-	   |----lsr = bit[(#bit_shift)-1]	        i.e.  LSR#5 => il carry out sarà il bit[4](quinto bit dunque)
-	   |
-	   |----asr = bit[(#bit_shift)-1]	        i.e.  ASR#5 => il carry out sarà il bit[4](quinto bit dunque)
-       |
-  	   |----ror = bit[(#bit_shift)-1]	        i.e.  ROR#5 => il carry out sarà il bit[4](quinto bit dunque)
-*/
 /**
  * @brief sets/clears Zero (Z), Negative (N), Overflow (V) and Carry (C) flag 
  * 
@@ -209,7 +200,7 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
     { 
         op2 = ins.word & 0xFF;
         shift = (ins.word & 0xF00) >> 7; // double the "rotate" field value
-        op2 = ((op2 >> shift) | (op2 << (32 - shift)));
+        op2 = ((op2 >> shift) | (op2 << (31 - shift+1)));
     }
     else // No immediate operand(bit[25]/I flag unset)
     {
@@ -217,10 +208,41 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
         shift = (ins.word & 0x10) ? 
                 (ins.word >> 8) & 0xF : // [4] set -> shift amount specified by the bottom byte of Rs
                 (ins.word >> 7) & 0x1F; // [4] clear -> shift amount is a 5 bit unsigned integer
-        op2 = type == LL ? (op2 << shift) :
-              type == LR ? ((uint32_t)op2 >> shift) :
-              type == AR ? (op2 >> shift) :
-              /* shift == RR? */ ((op2 >> shift) | (op2 << (32 - shift)));
+        /*Carry out: 
+        |----lsl = bit[(31-(#bit_shift)+1)]     i.e.  LSL#5 => il carry out sarà il bit[27](28esimo bit dunque)
+	    |
+	    |----lsr = bit[(#bit_shift)-1]	        i.e.  LSR#5 => il carry out sarà il bit[4](quinto bit dunque)
+	    |
+	    |----asr = bit[(#bit_shift)-1]	        i.e.  ASR#5 => il carry out sarà il bit[4](quinto bit dunque)
+        |
+  	    |----ror = bit[(#bit_shift)-1]	        i.e.  ROR#5 => il carry out sarà il bit[4](quinto bit dunque)*/
+        switch(type){
+            case LL:
+                op2=op2<<shift;
+                if(ins.word&0x00100000)
+                    registers[get_register(CPSR)].C= ((op2>>(31-shift+1))&1);
+                break;
+            
+            case LR:
+                op2=(uint32_t)op2 >> shift;
+                if(ins.word&0x00100000)
+                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
+
+                break;
+            case AR:
+                op2=op2>>shift;
+                if(ins.word&0x00100000)
+                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
+                break;
+            case RR:
+                op2=((op2 >> shift) | (op2 << (31 - shift+1)));
+                if(ins.word&0x00100000)
+                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
+
+                break;
+            default:
+                break;
+        }
     }
     return op2;
 }
