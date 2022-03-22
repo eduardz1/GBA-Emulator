@@ -293,8 +293,9 @@ uint32_t Arm7tdmi::fetch(Bus bus_controller){
             return bus_controller.RAM[R15];
 }
 /**
- * @brief Wrapper for decode_executeTHUMB and decode_executeARM32
- * 
+ * @brief Wrapper for @c decode_executeTHUMB() and @c decode_executeARM32()
+ * @see decode_executeTHUMB
+ * @see decode_executeARM32
  * @param ins Instruction to be decoded and executed. It can be decoded either in ARM mode or in THUMB mode
  */
 void Arm7tdmi::decode_execute(Arm7tdmi::_instruction ins)
@@ -571,7 +572,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
             switch(ins.opcode_id2)
             {   // Multiply       
             case 0x0: case 0x1: MUL_a(ins); break;
-            case 0x2: case 0x3: MLA(ins); break;
+            case 0x2: case 0x3: MLA_a(ins); break;
                 // Multiply Long
             case 0x8: case 0x9: UMULL(ins); break;
             case 0xA: case 0xB: UMLAL(ins); break;

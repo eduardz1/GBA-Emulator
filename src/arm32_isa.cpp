@@ -316,8 +316,10 @@ void Arm7tdmi::MOV_a(Arm7tdmi::_instruction ins)
     Rd = op2;
     
     set_condition_code_flags(Rd, Rn.word, op2, false);
-}   
+}
+
 #pragma endregion
+
 #pragma region // Mul operations
 
 /**
@@ -335,11 +337,41 @@ void Arm7tdmi::MUL_a(Arm7tdmi::_instruction ins)
     _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
 
     Rd = Rm.word * Rs.word;
-    set_register((_registers)(ins.Rd),Rd);
+    set_register((_registers)(ins.Rn),Rd); // Rd is in position Rn
     if(ins.word & 0x00100000) // flag S set
         set_condition_code_flags(Rd, Rm.word, Rs.word, false);
 }
-void Arm7tdmi::MLA(Arm7tdmi::_instruction ins) {}
+
+/**
+ * @brief Multiply Accumulate { Rd := (Rm *Rs) + Rn }
+ * 
+ * @param ins instruction
+ */
+void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
+{
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    int32_t Rd;
+    _register_type Rm = registers[get_register((_registers)(ins.Rm))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _register_type Rn = registers[get_register((_registers)(ins.Rd))];
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+
+    Rd = Rm.word * Rs.word + Rn.word;
+    set_register((_registers)(ins.Rn),Rd); // Rd is in position Rn
+    if(ins.word & 0x00100000) // flag S set
+        set_condition_code_flags(Rd, Rm.word, Rs.word, false);
+}
+
+/**
+ * @brief Signed Multiply & Accumulate Long { Rd := (Rm * Rs) + Rn }
+ * @code
+ * SMLAL{cond}{S} RdLo,RdHi,Rm,Rs
+ * @endcode
+ * @c word word
+ * 
+ * @param ins 
+ */
 void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {}

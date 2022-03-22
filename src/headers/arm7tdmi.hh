@@ -171,7 +171,7 @@ public:
     void LDRH(_instruction instruction);
     void LDRSB(_instruction instruction);
     void LDRSH(_instruction instruction);
-    void MLA(_instruction instruction);
+    void MLA_a(_instruction instruction);
     void MOV(_instruction instruction);
     void MRS(_instruction instruction);
     void MSR(_instruction instruction);
