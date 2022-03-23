@@ -372,10 +372,90 @@ void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
  * 
  * @param ins 
  */
-void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    int64_t rd;
+    
+    _register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
+    _register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _register_type Rm = registers[get_register((_registers)(ins.Rd))];
+    
+    rd=Rm.word*Rs.word + ((Rd_hi.word<<32) | (Rd_lo.word));
+    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if(ins.word & 0x00100000) // flag S set
+    {
+        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
+        registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+    }
+}
+void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    int64_t rd;
+    
+    //_register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
+    //_register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _register_type Rm = registers[get_register((_registers)(ins.Rd))];
+    
+    rd=Rm.word*Rs.word;
+    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if(ins.word & 0x00100000) // flag S set
+    {
+        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
+        registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+    }
+}
+void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    uint64_t rd;
+    
+    _register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
+    _register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _register_type Rm = registers[get_register((_registers)(ins.Rd))];
+    
+    rd=(uint32_t)Rm.word*(uint32_t)Rs.word + (uint32_t)(((uint32_t)Rd_hi.word<<32) | (uint32_t(Rd_lo.word)));
+    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if(ins.word & 0x00100000) // flag S set
+    {
+        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
+        registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+    }
+}
+void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {
+    if(!evaluate_cond((_cond)ins.cond)) return;
+
+    uint64_t rd;
+    
+    //_register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
+    //_register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
+    _register_type Rs = registers[get_register((_registers)(ins.Rs))];
+    _register_type Rm = registers[get_register((_registers)(ins.Rd))];
+    
+    rd=(uint32_t)Rm.word*(uint32_t)Rs.word;
+    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if(ins.word & 0x00100000) // flag S set
+    {
+        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
+        registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+    }
+}
 #pragma endregion
 #pragma region //Branch Operations
 void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
