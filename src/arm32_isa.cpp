@@ -1,6 +1,6 @@
 #include "headers/arm7tdmi.hh"
 using namespace cpu;
-// TODO: check for S flag
+
 #pragma region //ALU OPERATIONS
 
 /**
@@ -319,8 +319,7 @@ void Arm7tdmi::MOV_a(Arm7tdmi::_instruction ins)
 }
 
 #pragma endregion
-
-#pragma region // Mul operations
+#pragma region //Mul operations
 
 /**
  * @brief Multiply { Rd := Rm * Rs }
@@ -493,18 +492,26 @@ void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {
     return;
 }
 #pragma endregion
-void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
+#pragma region //Single Data Transfer
 void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}
+#pragma endregion
+#pragma region //Halfword and Signed Data Transfer
 void Arm7tdmi::LDRH(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRH(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRSB(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::LDRSH(Arm7tdmi::_instruction ins) {}
+#pragma endregion
+#pragma region //Block Data Transfer
+void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
+#pragma endregion
+#pragma region //PSR Transfer
 void Arm7tdmi::MRS(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::MSR(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STRH(Arm7tdmi::_instruction ins) {}
+#pragma endregion
 void Arm7tdmi::SWI(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SWP(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::SWPB(Arm7tdmi::_instruction ins) {}

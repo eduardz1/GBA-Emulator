@@ -1,5 +1,4 @@
 #include "headers/arm7tdmi.hh"
-#include <cmath>
 
 using namespace cpu;
 Arm7tdmi::Arm7tdmi(){
