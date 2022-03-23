@@ -1,6 +1,6 @@
 #include "headers/arm7tdmi.hh"
 using namespace cpu;
-
+/*TODO: figuring out a way to pass the bus controller/ram to a method so that it can load/store data*/
 #pragma region //ALU OPERATIONS
 
 /**
@@ -363,12 +363,9 @@ void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
 }
 
 /**
- * @brief Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn }
- * @code
- * SMLAL{cond}{S} RdLo,RdHi,Rm,Rs
- * @endcode
- * 
- * 
+ *  Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn } <br>
+ * <tt>SMLAL{cond}{S} RdLo,RdHi,Rm,Rs</tt>
+ *  
  * @param ins instruction
  */
 void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {
@@ -493,7 +490,28 @@ void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {
 }
 #pragma endregion
 #pragma region //Single Data Transfer
-void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {}
+/**
+ * Loads a word in memory specified by the address field
+ * 
+ * @param ins instruction
+ */
+void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {
+    if (!evaluate_cond((_cond)(ins.cond))) return;
+    
+    _register_type base_register = registers[get_register((_registers)ins.Rn)];
+    _register_type rd = registers[get_register((_registers)(ins.Rd))];
+    /*Computing the offset. Similar to the computing done in ALU operations*/
+    int32_t offset = (ins.opcode_id2 &0x2000000) != 0 ? ins.word & 0xFFF : get_ALU_op2((_shift)((ins.word >> 5) & 0x2),ins);
+    int32_t base_offset;
+    int32_t base_tmp=base_register.word;//saving the original base register for post_index
+
+    base_offset=(ins.word&0x800000) != 0 ? base_register.word+offset:base_register.word-offset;
+    /*bit[24] set   -> pre-index:   add offset to base register before loading
+              clear -> post-index:  add offset to base register after  loading*/
+    if(ins.word&0x1000000){//bit[24] set
+       // read_from_memory()
+    }
+}
 void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}

@@ -195,7 +195,7 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
     uint8_t shift;
     int32_t op2;
     
-    if ((ins.opcode_id2 & 0x2) == 0x2) // bit[25] aka I flag is set
+    if ((ins.opcode_id2 & 0x20) == 0x20) // bit[25] aka I flag is set
     { 
         op2 = ins.word & 0xFF;
         shift = (ins.word & 0xF00) >> 7; // double the "rotate" field value

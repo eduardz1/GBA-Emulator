@@ -136,6 +136,9 @@ public:
     void decode_executeARM32( _instruction instruction);
     void decode_executeTHUMB( _instruction instruction);
     void decode_execute( _instruction instruction);
+
+    int32_t read_from_memory(Bus bus_controller,uint32_t address);
+    void write_to_memory(Bus bus_controller,int32_t value,uint32_t address);
     
     _access_mode get_access_mode();
     void set_access_mode(_access_mode mode);
