@@ -162,7 +162,7 @@ public: // ARM32 & THUMB ISA
     void ADC_a(_instruction);           void MUL_a(_instruction);
     void ADD_a(_instruction);           void SMLAL_a(_instruction);
     void AND_a(_instruction);           void SMULL_a(_instruction);
-    void B_a(_instruction, _cond);      void UMLAL_a(_instruction); 
+    void B_a(_instruction);             void UMLAL_a(_instruction); 
     void BIC_a(_instruction);           void UMULL_a(_instruction);
     void BL_a(_instruction);    
     void BX_a(_instruction);            void MVN_a(_instruction);

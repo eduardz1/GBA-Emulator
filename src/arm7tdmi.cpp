@@ -182,9 +182,19 @@ Arm7tdmi::_access_mode Arm7tdmi::get_access_mode(){
 }
 
 /**
- * @brief based on [I] flag, assigns second operand either
- * to an immediate value (I set) or to the content of the register
- * pointed by op2. Shifts the result as specified by the instruction
+ * @brief Calculates value of second operand
+ * 
+ * @details 
+ *  Based on [I] flag, assigns second operand either
+ *  to an immediate value (I set) or to the content of the register
+ *  pointed by op2. Shifts the result as specified by the instruction and
+ *  computes the carry carry based on this scheme:
+ * 
+ *  Carry out 
+ *      |----lsl = bit[(31 - (#bit_shift) + 1)]
+ *      |----lsr = bit[(#bit_shift) - 1]
+ *      |----asr = bit[(#bit_shift) - 1]   
+ *      |----ror = bit[(#bit_shift) - 1]
  * 
  * @param type type of shift performed
  * @param ins instruction
@@ -199,7 +209,9 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
     { 
         op2 = ins.word & 0xFF;
         shift = (ins.word & 0xF00) >> 7; // double the "rotate" field value
-        op2 = ((op2 >> shift) | (op2 << (31 - shift+1)));
+        op2 = ((op2 >> shift) | (op2 << (32 - shift)));
+        if (ins.word & 0x00100000)
+            registers[get_register(CPSR)].C = (op2 >> (shift - 1)) & 1;
     }
     else // No immediate operand(bit[25]/I flag unset)
     {
@@ -207,44 +219,34 @@ int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
         shift = (ins.word & 0x10) ? 
                 (ins.word >> 8) & 0xF : // [4] set -> shift amount specified by the bottom byte of Rs
                 (ins.word >> 7) & 0x1F; // [4] clear -> shift amount is a 5 bit unsigned integer
-        /*Carry out: 
-        |----lsl = bit[(31-(#bit_shift)+1)]     i.e.  LSL#5 => il carry out sarà il bit[27](28esimo bit dunque)
-	    |
-	    |----lsr = bit[(#bit_shift)-1]	        i.e.  LSR#5 => il carry out sarà il bit[4](quinto bit dunque)
-	    |
-	    |----asr = bit[(#bit_shift)-1]	        i.e.  ASR#5 => il carry out sarà il bit[4](quinto bit dunque)
-        |
-  	    |----ror = bit[(#bit_shift)-1]	        i.e.  ROR#5 => il carry out sarà il bit[4](quinto bit dunque)*/
-        switch(type){
-            case LL:
-                op2=op2<<shift;
-                if(ins.word&0x00100000)
-                    registers[get_register(CPSR)].C= ((op2>>(31-shift+1))&1);
-                break;
-            
-            case LR:
-                op2=(uint32_t)op2 >> shift;
-                if(ins.word&0x00100000)
-                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
-
-                break;
-            case AR:
-                op2=op2>>shift;
-                if(ins.word&0x00100000)
-                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
-                break;
-            case RR:
-                op2=((op2 >> shift) | (op2 << (31 - shift+1)));
-                if(ins.word&0x00100000)
-                    registers[get_register(CPSR)].C=(op2>>(shift-1))&1;
-
-                break;
-            default:
-                break;
+        
+        switch (type)
+        {
+        case LL:
+            op2 = op2 << shift;
+            if (ins.word & 0x00100000)
+                registers[get_register(CPSR)].C = ((op2 >> (32 - shift)) & 1);
+            break;
+        case LR:
+            op2 = (uint32_t)op2 >> shift;
+            if (ins.word & 0x00100000)
+                registers[get_register(CPSR)].C = (op2 >> (shift - 1)) & 1;
+            break;
+        case AR:
+            op2 = op2 >> shift;
+            if (ins.word & 0x00100000)
+                registers[get_register(CPSR)].C = (op2 >> (shift - 1)) & 1;
+            break;
+        case RR: default:
+            op2 = ((op2 >> shift) | (op2 << (32 - shift)));
+            if (ins.word & 0x00100000)
+                registers[get_register(CPSR)].C = (op2 >> (shift - 1)) & 1;
+            break;
         }
     }
     return op2;
 }
+
 /**
  * @brief Checks,based on the condition, which condition must be evaluated
  * 
@@ -623,7 +625,7 @@ void Arm7tdmi::decode_executeARM32(Arm7tdmi::_instruction ins)
     case 0x2: {
         switch(ins.opcode_id2 & 0x21) // isolate bits 20 and 25
         {
-        case 0x20: case 0x21: B_a(ins, (_cond)(ins.word >> 28)); break; // xx1x xxx0 U xx1x xxx1
+        case 0x20: case 0x21: B_a(ins); break; // xx1x xxx0 U xx1x xxx1
         case 0x01: LDM_a(ins); break; // xx0x xxx1
         case 0x00: STM_a(ins); break; // xx0x xxx0
         }

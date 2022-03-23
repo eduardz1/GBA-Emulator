@@ -1,7 +1,7 @@
 #include "headers/arm7tdmi.hh"
 using namespace cpu;
 /*TODO: figuring out a way to pass the bus controller/ram to a method so that it can load/store data*/
-#pragma region //ALU OPERATIONS
+#pragma region // ALU OPERATIONS
 
 /**
  * @brief Add { Rd := Rn + Op2 }
@@ -362,8 +362,7 @@ void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
 }
 
 /**
- *  Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn } \n 
- * @code {.asm} SMLAL{cond}{S} RdLo,RdHi,Rm,Rs @endcode 
+ *  Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn }
  *  
  * @param ins instruction
  */
@@ -391,7 +390,7 @@ void Arm7tdmi::SMLAL_a(Arm7tdmi::_instruction ins)
 /**
  * @brief Signed Multiply Long { Rd := Rm * Rs }
  * 
- * @param ins 
+ * @param ins instruction
  */
 void Arm7tdmi::SMULL_a(Arm7tdmi::_instruction ins) 
 {
@@ -461,37 +460,99 @@ void Arm7tdmi::UMULL_a(Arm7tdmi::_instruction ins)
         registers[get_register(CPSR)].N = (rd < 0) ? 1 : 0;
     }
 }
-#pragma endregion
 
+#pragma endregion
 #pragma region // Branch Operations
+
+/**
+ * @brief Branch and Exchange { R15 := Rn, T bit := Rn[0] }
+ * 
+ * @details
+ *  The instruction is only executed if the condition is true.
+ *  This instruction performs a branch by copying the contents of a general register, Rn,
+ *  into the program counter, PC. The branch causes a pipeline flush and refill from the
+ *  address specified by Rn. This instruction also permits the instruction set to be
+ *  exchanged. When the instruction is executed, the value of Rn[0] determines whether
+ *  the instruction stream will be decoded as ARM or THUMB instructions.
+ * 
+ * @param ins instruction
+ */
 void Arm7tdmi::BX_a(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)(ins.cond))) return;
 
-    // If the first bit of Rn(Rm in our case, and anyway it's the first bit of the instruction) is 1
-    // then the mode gets switched to THUMB_MODE, otherwhise ARM_MODE
+    // Check first bit of Rn
     if (ins.word & 0x1)
         set_mode(THUMB_MODE);
     else
         set_mode(ARM_MODE);
-    // copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
+    
     registers[get_register(R15)].word = registers[get_register((_registers)ins.Rm)].word;
 }
 
-void Arm7tdmi::B_a(Arm7tdmi::_instruction ins, _cond condition)
+/**
+ * @brief Branch { R15 := address }
+ * 
+ * @details
+ *  The instruction is only executed if the condition is true.
+ *  Branch instructions contain a signed 2's complement 24 bit offset. This is shifted left
+ *  two bits, sign extended to 32 bits, and added to the PC. The instruction can therefore
+ *  specify a branch of +/- 32Mbytes. The branch offset must take account of the prefetch
+ *  operation, which causes the PC to be 2 words (8 bytes) ahead of the current
+ *  instruction.
+ *  Branches beyond +/- 32Mbytes must use an offset or absolute destination which has
+ *  been previously loaded into a register. In this case the PC should be manually saved
+ *  in R14 if a Branch with Link type operation is required.
+ * 
+ * @param ins instruction
+ */
+void Arm7tdmi::B_a(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)(ins.cond))) return;
 
-    int32_t offset = (ins.word & 0x00FFFFFF) << 2; // isolating bit[0:23] and shifting left twice(offset<<2)
-    if (ins.word & 0x01000000)                     // if the Link bit is set(bit[24]), I save the old PC in the link register
-        set_register(R15, registers[get_register(R15)].word);
-    registers[get_register(R14)].word = +offset; // adding the offset to PC
-    return;
+    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend sign of offset and add 2bit left shift
+    registers[get_register(R15)].word += offset;
 }
+
+/**
+ * @brief Branch with Link { R14 := R15, R15 := address }
+ * 
+ * @details
+ *  The instruction is only executed if the condition is true.
+ *  Branch with Link (BL) writes the old PC into the link register (R14) of the current bank.
+ *  The PC value written into R14 is adjusted to allow for the prefetch, and contains the
+ *  address of the instruction following the branch and link instruction. Note that the CPSR
+ *  is not saved with the PC and R14[1:0] are always cleared.
+ *  To return from a routine called by Branch with Link use MOV PC,R14 if the link register
+ *  is still valid or   LDM Rn!,{..PC} if the link register has been saved onto a stack pointed
+ *  to by Rn.
+ * 
+ * @param ins instruction
+ */
+void Arm7tdmi::BL_a(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)(ins.cond))) return;
+
+    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend sign of offset and add 2bit left shift
+    if (ins.word & 0x01000000)
+        set_register(R14, registers[get_register(R15)].word);
+
+    registers[get_register(R15)].word += offset;
+}
+
 #pragma endregion
 #pragma region // Single Data Transfer
+
 /**
- * Loads a word in memory specified by the address field
+ * @brief Load register from memory { Rd := (address) }
+ * 
+ * @details
+ *  The instruction is only executed if the condition is true.
+ *  The single data transfer instructions are used to load or store single bytes or words of
+ *  data. The memory address used in the transfer is calculated by adding an offset to or
+ *  subtracting an offset from a base register.
+ *  The result of this calculation may be written back into the base register if auto-indexing
+ *  is required.
  *
  * @param ins instruction
  */
@@ -501,19 +562,23 @@ void Arm7tdmi::LDR_a(Arm7tdmi::_instruction ins)
 
     _register_type base_register = registers[get_register((_registers)ins.Rn)];
     _register_type rd = registers[get_register((_registers)(ins.Rd))];
-    /*Computing the offset. Similar to the computing done in ALU operations*/
-    int32_t offset = (ins.opcode_id2 & 0x2000000) != 0 ? ins.word & 0xFFF : get_ALU_op2((_shift)((ins.word >> 5) & 0x2), ins);
+   
+    int32_t offset = (ins.opcode_id2 & 0x20) ? // Check I flag 
+                     ins.word & 0xFFF : 
+                     get_ALU_op2((_shift)((ins.word >> 0x5) & 0x2), ins);
+
     int32_t base_offset;
     int32_t base_tmp = base_register.word; // saving the original base register for post_index
 
-    base_offset = (ins.word & 0x800000) != 0 ? base_register.word + offset : base_register.word - offset;
-    /*bit[24] set   -> pre-index:   add offset to base register before loading
-              clear -> post-index:  add offset to base register after  loading*/
+    base_offset = (ins.word & 0x800000) ? base_register.word + offset : base_register.word - offset;
+    /* bit[24] set   -> pre-index:   add offset to base register before loading
+               clear -> post-index:  add offset to base register after  loading */
     if (ins.word & 0x1000000)
     { // bit[24] set
         // read_from_memory()
     }
 }
+
 void Arm7tdmi::LDRB_a(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STR_a(Arm7tdmi::_instruction ins) {}
 void Arm7tdmi::STRB_a(Arm7tdmi::_instruction ins) {}
