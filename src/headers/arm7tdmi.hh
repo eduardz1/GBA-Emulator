@@ -154,73 +154,63 @@ public:
     int32_t get_ALU_op2(_shift type, _instruction ins);
     void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2, bool overflowable);
 
-public:
+public: // ARM32 & THUMB ISA
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
     void exception_handler();
     
-    // ARM instructions
-    void ADD_a(_instruction instruction);
-    void ADC_a(_instruction instruction);
-    void AND_a(_instruction instruction);
-    void B(_instruction instruction, _cond condition);
-    void BIC_a(_instruction instruction);
-    void BX(_instruction instruction);
-    void CMN_a(_instruction instruction);
-    void CMP_a(_instruction instruction);
-    void EOR(_instruction instruction);
-    void LDM(_instruction instruction);
-    void LDR(_instruction instruction);
-    void LDRB(_instruction instruction);
-    void LDRH(_instruction instruction);
-    void LDRSB(_instruction instruction);
-    void LDRSH(_instruction instruction);
-    void MLA_a(_instruction instruction);
-    void MOV(_instruction instruction);
-    void MRS(_instruction instruction);
-    void MSR(_instruction instruction);
-    void MUL(_instruction instruction);
-    void MVN(_instruction instruction);
-    void ORR(_instruction instruction);
-    void RSB_a(_instruction instruction);
-    void RSC_a(_instruction instruction);
-    void SBC(_instruction instruction);
-    void SMLAL(_instruction instruction);
-    void SMULL(_instruction instruction);
-    void STM(_instruction instruction); 
-    void STR(_instruction instruction); 
-    void STRB(_instruction instruction);
-    void STRH(_instruction instruction);
-    void SUB_a(_instruction instruction);
-    void SWI(_instruction instruction);
-    void SWP(_instruction instruction);
-    void SWPB(_instruction instruction);
-    void TEQ_a(_instruction instruction); 
-    void TST_a(_instruction instruction); 
-    void UMLAL(_instruction instruction); 
-    void UMULL(_instruction instruction); 
+    #pragma region // ARM instruction set
+    void ADC_a(_instruction);           void MUL_a(_instruction);
+    void ADD_a(_instruction);           void SMLAL_a(_instruction);
+    void AND_a(_instruction);           void SMULL_a(_instruction);
+    void B_a(_instruction, _cond);      void UMLAL_a(_instruction); 
+    void BIC_a(_instruction);           void UMULL_a(_instruction);
+    void BL_a(_instruction);    
+    void BX_a(_instruction);            void MVN_a(_instruction);
+    /* void CDP_a(_instruction); */     void ORR_a(_instruction);
+    void CMN_a(_instruction);           void RSB_a(_instruction);
+    void CMP_a(_instruction);           void RSC_a(_instruction);
+    void EOR_a(_instruction);           void SBC_a(_instruction);
+    /* void LDC_a(_instruction); */     /* void STC_a(_instruction); */
+    void LDM_a(_instruction);           void STM_a(_instruction); 
 
-    // THUMB instructions
-    void LSL(_instruction instruction); 
-    void LSR(_instruction instruction);
-    void ASR(_instruction instruction);
-    void SUBS(_instruction instruction);
-    void ADDS(_instruction instruction);
-    void ADCS(_instruction instruction);
-    void ANDS(_instruction instruction);
-    void MOV_a(_instruction instruction);
-    void EOR_a(_instruction instruction);
-    void SBC_a(_instruction instruction);
-    void ROR(_instruction instruction); 
-    void ORR_a(_instruction instruction);
-    void NEG(_instruction instruction);
-    void MUL_a(_instruction instruction);
-    void BICS(_instruction instruction);
-    void MVN_a(_instruction instruction);
-    void PUSH(_instruction instruction);
-    void POP(_instruction instruction);
-    void STMIA(_instruction instruction); 
-    void LDMIA(_instruction instruction);
-    void BL(_instruction instruction);
+    void LDR_a(_instruction);           void STR_a(_instruction);
+    void LDRB_a(_instruction);          void STRB_a(_instruction);
+    void LDRH_a(_instruction);          void STRH_a(_instruction);
+    void LDRSB_a(_instruction);         
+    void LDRSH_a(_instruction);         void SUB_a(_instruction);
+                                        void SWI_a(_instruction);
+    /* void MCR_a(_instruction); */     void SWP_a(_instruction);
+    void MLA_a(_instruction);           void SWPB_a(_instruction);
+    void MOV_a(_instruction);   
+    /* void MRC_a(_instruction); */      
+    void MRS_a(_instruction);           void TEQ_a(_instruction);
+    void MSR_a(_instruction);           void TST_a(_instruction);
+    #pragma endregion
+    
+    #pragma region // THUMB instruction set
+    void ADC_t(_instruction);           void LDSB_t(_instruction); 
+    void ADD_t(_instruction);           void LDSH_t(_instruction);
+    void AND_t(_instruction);           
+    void ASR_t(_instruction);           void LSR_t(_instruction);
+    void B_t(_instruction, _cond);      void MOV_t(_instruction);
+    void Bxx_t(_instruction); /*(?)*/   void MUL_t(_instruction);
+    void BIC_t(_instruction);           void MVN_t(_instruction);
+    void BL_t(_instruction);            void NEG_t(_instruction);
+    void BX_t(_instruction);            void ORR_t(_instruction);
+    void CMN_t(_instruction);           void POP_t(_instruction);
+    void CMP_t(_instruction);           void PUSH_t(_instruction);
+    void EOR_t(_instruction);           void ROR_t(_instruction);
+    void LDMIA_t(_instruction);         void SBC_t(_instruction);
+                                        void STMIA_t(_instruction); 
+    void LDR_t(_instruction);            
+    void LDRB_t(_instruction);          void STR_t(_instruction);
+    void LDRH_t(_instruction);          void STRB_t(_instruction);
+    void LDRSB_t(_instruction);         void STRH_t(_instruction);
+    void LDRSH_t(_instruction);         
+                                        void SWI_t(_instruction);
+                                        void SUB_t(_instruction);
+    void LSL_t(_instruction);           void TST_t(_instruction);
+    #pragma endregion
 };
 }
 #endif /* !ARM7TDMI_H */

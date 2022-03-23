@@ -306,20 +306,19 @@ void Arm7tdmi::TST_a(Arm7tdmi::_instruction ins)
  */
 void Arm7tdmi::MOV_a(Arm7tdmi::_instruction ins)
 {
-   if (!evaluate_cond((_cond)ins.cond)) return;
+    if (!evaluate_cond((_cond)ins.cond)) return;
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register((_registers)(ins.Rn))];
-    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
-
+    _shift shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift   
     op2 = get_ALU_op2(shift_type, ins);
     Rd = op2;
-    
+
     set_condition_code_flags(Rd, Rn.word, op2, false);
 }
 
 #pragma endregion
-#pragma region //Mul operations
+#pragma region // Mul operations
 
 /**
  * @brief Multiply { Rd := Rm * Rs }
@@ -363,48 +362,48 @@ void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
 }
 
 /**
- *  Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn } <br>
- * <tt>SMLAL{cond}{S} RdLo,RdHi,Rm,Rs</tt>
+ *  Signed Multiply Long with Accumulate  { Rd := (Rm * Rs) + Rn } \n 
+ * @code {.asm} SMLAL{cond}{S} RdLo,RdHi,Rm,Rs @endcode 
  *  
  * @param ins instruction
  */
-void Arm7tdmi::SMLAL(Arm7tdmi::_instruction ins) {
+void Arm7tdmi::SMLAL_a(Arm7tdmi::_instruction ins) 
+{
     if(!evaluate_cond((_cond)ins.cond)) return;
 
-    int64_t rd;
-    
+    int64_t rd; 
     _register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
     _register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
-    
-    rd=Rm.word*Rs.word + ((Rd_hi.word<<32) | (Rd_lo.word));
-    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
-    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+
+    rd = Rm.word * Rs.word + ((Rd_hi.word << 32) | (Rd_lo.word));
+    set_register((_registers)(ins.Rd), (rd) & 0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn), (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
 
     if(ins.word & 0x00100000) // flag S set
     {
-        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
         registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
         registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
     }
 }
+
 /**
  * @brief Signed Multiply Long { Rd := Rm * Rs }
  * 
  * @param ins 
  */
-void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {
+void Arm7tdmi::SMULL_a(Arm7tdmi::_instruction ins) 
+{
     if(!evaluate_cond((_cond)ins.cond)) return;
 
     int64_t rd;
-    
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
     
     rd=Rm.word*Rs.word;
-    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
-    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
+    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
 
     if(ins.word & 0x00100000) // flag S set
     {
@@ -412,64 +411,62 @@ void Arm7tdmi::SMULL(Arm7tdmi::_instruction ins) {
         registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
     }
 }
+
 /**
  * @brief Unsigned Multiply Long with Accumulate { Rd := (Rm * Rs) + Rn}
  * 
  * @param ins instruction
  */
-void Arm7tdmi::UMLAL(Arm7tdmi::_instruction ins) {
+void Arm7tdmi::UMLAL_a(Arm7tdmi::_instruction ins) 
+{
     if(!evaluate_cond((_cond)ins.cond)) return;
 
     uint64_t rd;
-    
     _register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
     _register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
-    
-    rd=(uint32_t)Rm.word*(uint32_t)Rs.word + (uint32_t)(((uint32_t)Rd_hi.word<<32) | (uint32_t(Rd_lo.word)));
-    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
-    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
 
-    if(ins.word & 0x00100000) // flag S set
+    rd = (uint32_t)Rm.word * (uint32_t)Rs.word + (uint32_t)(((uint32_t)Rd_hi.word << 32) | (uint32_t(Rd_lo.word)));
+    set_register((_registers)(ins.Rd), (rd)&0xFFFFFFFF);         // saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn), (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if (ins.word & 0x00100000) // flag S set
     {
-        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
         registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
-        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0) ? 1 : 0;
     }
 }
+
 /**
  * @brief Unsigned Multiply Long {Rd := Rm * Rs}
  * 
  * @param ins instruction
  */
-void Arm7tdmi::UMULL(Arm7tdmi::_instruction ins) {
-    if(!evaluate_cond((_cond)ins.cond)) return;
+void Arm7tdmi::UMULL_a(Arm7tdmi::_instruction ins)
+{
+    if (!evaluate_cond((_cond)ins.cond)) return;
 
     uint64_t rd;
-    
-    //_register_type Rd_hi = registers[get_register((_registers)(ins.Rn))];
-    //_register_type Rd_lo = registers[get_register((_registers)(ins.Rd))];
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
-    
-    rd=(uint32_t)Rm.word*(uint32_t)Rs.word;
-    set_register((_registers)(ins.Rd),(rd)&0xFFFFFFFF);//saving lower 32 bits in rd_low(aka bit[12..15])
-    set_register((_registers)(ins.Rn),(rd>>32)&0xFFFFFFFF);//saving upper 32 bits in rd_high(aka bit[16..19])
 
-    if(ins.word & 0x00100000) // flag S set
+    rd = (uint32_t)Rm.word * (uint32_t)Rs.word;
+    set_register((_registers)(ins.Rd), (rd)&0xFFFFFFFF);         // saving lower 32 bits in rd_low(aka bit[12..15])
+    set_register((_registers)(ins.Rn), (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+
+    if (ins.word & 0x00100000) // flag S set
     {
-        // set_condition_code_flags(rd, Rm.word, Rs.word, false);
         registers[get_register(CPSR)].Z = (rd == 0) ? 1 : 0;
-        registers[get_register(CPSR)].N = (rd < 0)  ? 1 : 0;
+        registers[get_register(CPSR)].N = (rd < 0) ? 1 : 0;
     }
 }
 #pragma endregion
-#pragma region //Branch Operations
-void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
+
+#pragma region // Branch Operations
+void Arm7tdmi::BX_a(Arm7tdmi::_instruction ins)
 {
-    if (!evaluate_cond((_cond)(ins.cond)))
-        return;
+    if (!evaluate_cond((_cond)(ins.cond))) return;
 
     // If the first bit of Rn(Rm in our case, and anyway it's the first bit of the instruction) is 1
     // then the mode gets switched to THUMB_MODE, otherwhise ARM_MODE
@@ -480,57 +477,62 @@ void Arm7tdmi::BX(Arm7tdmi::_instruction ins)
     // copying the content of the Rm register(first 4 bit of the instruction) into the PC(R15 is the PC)
     registers[get_register(R15)].word = registers[get_register((_registers)ins.Rm)].word;
 }
-void Arm7tdmi::B(Arm7tdmi::_instruction ins, _cond condition) {
+
+void Arm7tdmi::B_a(Arm7tdmi::_instruction ins, _cond condition)
+{
     if (!evaluate_cond((_cond)(ins.cond))) return;
-    int32_t offset = (ins.word&0x00FFFFFF)<<2;//isolating bit[0:23] and shifting left twice(offset<<2)
-    if(ins.word&0x01000000)//if the Link bit is set(bit[24]), I save the old PC in the link register
-        set_register(R15,registers[get_register(R15)].word);
-    registers[get_register(R14)].word =+ offset;//adding the offset to PC
+
+    int32_t offset = (ins.word & 0x00FFFFFF) << 2; // isolating bit[0:23] and shifting left twice(offset<<2)
+    if (ins.word & 0x01000000)                     // if the Link bit is set(bit[24]), I save the old PC in the link register
+        set_register(R15, registers[get_register(R15)].word);
+    registers[get_register(R14)].word = +offset; // adding the offset to PC
     return;
 }
 #pragma endregion
-#pragma region //Single Data Transfer
+#pragma region // Single Data Transfer
 /**
  * Loads a word in memory specified by the address field
- * 
+ *
  * @param ins instruction
  */
-void Arm7tdmi::LDR(Arm7tdmi::_instruction ins) {
+void Arm7tdmi::LDR_a(Arm7tdmi::_instruction ins)
+{
     if (!evaluate_cond((_cond)(ins.cond))) return;
-    
+
     _register_type base_register = registers[get_register((_registers)ins.Rn)];
     _register_type rd = registers[get_register((_registers)(ins.Rd))];
     /*Computing the offset. Similar to the computing done in ALU operations*/
-    int32_t offset = (ins.opcode_id2 &0x2000000) != 0 ? ins.word & 0xFFF : get_ALU_op2((_shift)((ins.word >> 5) & 0x2),ins);
+    int32_t offset = (ins.opcode_id2 & 0x2000000) != 0 ? ins.word & 0xFFF : get_ALU_op2((_shift)((ins.word >> 5) & 0x2), ins);
     int32_t base_offset;
-    int32_t base_tmp=base_register.word;//saving the original base register for post_index
+    int32_t base_tmp = base_register.word; // saving the original base register for post_index
 
-    base_offset=(ins.word&0x800000) != 0 ? base_register.word+offset:base_register.word-offset;
+    base_offset = (ins.word & 0x800000) != 0 ? base_register.word + offset : base_register.word - offset;
     /*bit[24] set   -> pre-index:   add offset to base register before loading
               clear -> post-index:  add offset to base register after  loading*/
-    if(ins.word&0x1000000){//bit[24] set
-       // read_from_memory()
+    if (ins.word & 0x1000000)
+    { // bit[24] set
+        // read_from_memory()
     }
 }
-void Arm7tdmi::LDRB(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STR(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STRB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRB_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STR_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRB_a(Arm7tdmi::_instruction ins) {}
 #pragma endregion
 #pragma region //Halfword and Signed Data Transfer
-void Arm7tdmi::LDRH(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::STRH(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::LDRSB(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::LDRSH(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRH_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STRH_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRSB_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDRSH_a(Arm7tdmi::_instruction ins) {}
 #pragma endregion
 #pragma region //Block Data Transfer
-void Arm7tdmi::STM(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::LDM(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::STM_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::LDM_a(Arm7tdmi::_instruction ins) {}
 #pragma endregion
 #pragma region //PSR Transfer
-void Arm7tdmi::MRS(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::MSR(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::MRS_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::MSR_a(Arm7tdmi::_instruction ins) {}
 #pragma endregion
-void Arm7tdmi::SWI(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::SWP(Arm7tdmi::_instruction ins) {}
-void Arm7tdmi::SWPB(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWI_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWP_a(Arm7tdmi::_instruction ins) {}
+void Arm7tdmi::SWPB_a(Arm7tdmi::_instruction ins) {}
 

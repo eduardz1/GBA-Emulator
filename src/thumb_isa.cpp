@@ -6,7 +6,7 @@ using namespace cpu;
  * @brief Shift Rs left by a 5-bit immediate 
  * value and store the result in Rd.
  */
-void Arm7tdmi::LSL(Arm7tdmi::_instruction ins)
+void Arm7tdmi::LSL_t(Arm7tdmi::_instruction ins)
 {
     uint8_t val; // Immediate Value
     _register_type Rd; // Destination Register
@@ -21,7 +21,7 @@ void Arm7tdmi::LSL(Arm7tdmi::_instruction ins)
  * @brief Perform logical shift right on Rs by a 5-bit 
  * immediate value and store the result in Rd.
  */
-void Arm7tdmi::LSR(Arm7tdmi::_instruction ins)
+void Arm7tdmi::LSR_t(Arm7tdmi::_instruction ins)
 {
     uint8_t val; // Immediate Value
     _register_type Rd; // Destination Register
@@ -32,7 +32,7 @@ void Arm7tdmi::LSR(Arm7tdmi::_instruction ins)
     set_register((_registers)Rd.word, (Rs.word << (val)));
 }
 
-void Arm7tdmi::NEG(Arm7tdmi::_instruction instruction)
+void Arm7tdmi::NEG_t(Arm7tdmi::_instruction instruction)
 {
     _register_type rd, rn;
     rd = registers[(_registers)(instruction.halfword_lo & 0xF)];
@@ -44,7 +44,7 @@ void Arm7tdmi::NEG(Arm7tdmi::_instruction instruction)
  * @brief Perform arithmetic shift right on Rs by a 5-bit
  *  immediate value and store the result in Rd.
  */
-void Arm7tdmi::ASR(Arm7tdmi::_instruction ins)
+void Arm7tdmi::ASR_t(Arm7tdmi::_instruction ins)
 {
     uint8_t sign; // Most significant bit of Rs
     uint8_t val; // Immediate Value
@@ -61,7 +61,7 @@ void Arm7tdmi::ASR(Arm7tdmi::_instruction ins)
  * @brief if I[0]: Subtract contents of Rn to contents of Rs. Place result in Rd.
  * else: Subtract 3-bit immediate value to contents of Rs. Place result in Rd.
  */
-void Arm7tdmi::SUBS(Arm7tdmi::_instruction ins)
+void Arm7tdmi::SUB_t(Arm7tdmi::_instruction ins)
 {
     _register_type Rd; // Destination Register
     _register_type Rs; // Source Register
@@ -78,7 +78,7 @@ void Arm7tdmi::SUBS(Arm7tdmi::_instruction ins)
     set_register((_registers)Rd.word, (Rs.word - Rn_Offset3));
 }
 
-void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction)
+void Arm7tdmi::ADC_t(Arm7tdmi::_instruction instruction)
 {
     _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.halfword_lo&0xF)];
@@ -90,7 +90,7 @@ void Arm7tdmi::ADCS(Arm7tdmi::_instruction instruction)
  * @brief if I[0]: Add contents of Rn to contents of Rs. Place result in Rd.
  * else: Add 3-bit immediate value to contents of Rs. Place result in Rd.
  */
-void Arm7tdmi::ADDS(Arm7tdmi::_instruction ins) // NEED TO IMPLEMENT LATER IN A MEGA ADD
+void Arm7tdmi::ADD_t(Arm7tdmi::_instruction ins) // NEED TO IMPLEMENT LATER IN A MEGA ADD
 {
     _register_type Rd; // Destination Register
     _register_type Rs; // Source Register
@@ -112,7 +112,7 @@ void Arm7tdmi::ADDS(Arm7tdmi::_instruction ins) // NEED TO IMPLEMENT LATER IN A 
 /**
  * @brief 
  */
-void Arm7tdmi::ANDS(Arm7tdmi::_instruction instruction){
+void Arm7tdmi::AND_t(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.Rd)];
     rn=registers[(_registers)(instruction.Rn)];
@@ -126,7 +126,7 @@ void Arm7tdmi::EOR_a(Arm7tdmi::_instruction instruction){
     rd.word=rd.word^rn.word;
 }
 // void Arm7tdmi::SBCS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::ROR(Arm7tdmi::_instruction instruction)
+void Arm7tdmi::ROR_t(Arm7tdmi::_instruction instruction)
 {
     // https://www.geeksforgeeks.org/rotate-bits-of-an-integer/
     _register_type rd, rn;
@@ -135,21 +135,21 @@ void Arm7tdmi::ROR(Arm7tdmi::_instruction instruction)
     rd.word = (rd.word >> rn.word) | (rd.word << (32 - rn.word));
 }
 // void Arm7tdmi::ORRS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::MUL_a(Arm7tdmi::_instruction instruction){
+void Arm7tdmi::MUL_t(Arm7tdmi::_instruction instruction){
     _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.halfword_lo&0xF)];
     rn=registers[(_registers)((instruction.halfword_lo>>4)&0xF)];//rn is rs in THUMB
     rd.word=rd.word*rn.word;
     }
-void Arm7tdmi::BICS(Arm7tdmi::_instruction instruction){
+void Arm7tdmi::BIC_t(Arm7tdmi::_instruction instruction){
      _register_type rd,rn,op2;
     rd=registers[(_registers)(instruction.halfword_lo&0xF)];
     rn=registers[(_registers)((instruction.halfword_lo>>4)&0xF)];//rn is rs in THUMB
     rd.word=rd.word&~rn.word;
 }
 // void Arm7tdmi::MVNS(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::PUSH(Arm7tdmi::_instruction instruction) {}
-void Arm7tdmi::POP(Arm7tdmi::_instruction instruction) {}
+void Arm7tdmi::PUSH_t(Arm7tdmi::_instruction instruction) {}
+void Arm7tdmi::POP_t(Arm7tdmi::_instruction instruction) {}
 // void Arm7tdmi::STMIA(Arm7tdmi::_instruction instruction){}
 // void Arm7tdmi::LDMIA(Arm7tdmi::_instruction instruction){}
-void Arm7tdmi::BL(Arm7tdmi::_instruction instruction) {}
+void Arm7tdmi::BL_t(Arm7tdmi::_instruction instruction) {}
