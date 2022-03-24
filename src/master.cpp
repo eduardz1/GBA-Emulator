@@ -12,9 +12,9 @@ int main()
     //uint32_t write_try = 98989898;
     //int checks = 17000;
     Bus prova;
-    cpu::Arm7tdmi cpu;
     FILE* bios_bin=fopen("gba_bios.bin","rb");
     prova.init_bios_ram(bios_bin);
+    cpu::Arm7tdmi cpu=cpu::Arm7tdmi(prova);
     //(prova.*prova.BIOS_ROM.write_ptr)(prova.BIOS_ROM, size, write_try);
     //std::cout << "----------------------------------------------" << std::endl;
     //uint32_t su = (prova.*prova.BIOS_ROM.read_ptr)(prova.BIOS_ROM, size);

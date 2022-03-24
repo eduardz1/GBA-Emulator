@@ -376,7 +376,7 @@ void Arm7tdmi::SMLAL_a(Arm7tdmi::_instruction ins)
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
 
-    rd = Rm.word * Rs.word + ((Rd_hi.word << 32) | (Rd_lo.word));
+    rd = Rm.word * Rs.word + (((uint64_t) Rd_hi.word << 32) | (Rd_lo.word));
     set_register((_registers)(ins.Rd), (rd) & 0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
     set_register((_registers)(ins.Rn), (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
 
@@ -426,7 +426,7 @@ void Arm7tdmi::UMLAL_a(Arm7tdmi::_instruction ins)
     _register_type Rs = registers[get_register((_registers)(ins.Rs))];
     _register_type Rm = registers[get_register((_registers)(ins.Rd))];
 
-    rd = (uint32_t)Rm.word * (uint32_t)Rs.word + (uint32_t)(((uint32_t)Rd_hi.word << 32) | (uint32_t(Rd_lo.word)));
+    rd = (uint32_t)Rm.word * (uint32_t)Rs.word + (uint32_t)(((uint64_t)Rd_hi.word << 32) | (uint32_t(Rd_lo.word)));
     set_register((_registers)(ins.Rd), (rd)&0xFFFFFFFF);         // saving lower 32 bits in rd_low(aka bit[12..15])
     set_register((_registers)(ins.Rn), (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
 

@@ -6,6 +6,11 @@
 #include "bus.hh"
 namespace cpu
 {
+/**
+ * @brief 
+ 
+ * 
+ */
 class Arm7tdmi
 {
 private:
