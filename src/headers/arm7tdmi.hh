@@ -3,6 +3,7 @@
 #include <array>
 #include <stdio.h>
 #include <iostream>
+#include <functional>
 #include "bus.hh"
 namespace cpu
 {
@@ -123,13 +124,16 @@ private:
         PL, VS, VC, HI, LS,
         GE, LT, GT, LE, 
         AL, // unconditional branch
-        RESERVED//THUMB only, it causes the branch to behave like a SWI instruction
+        RESERVED //THUMB only, it causes the branch to behave like a SWI instruction
     };
 
     // Rd usually is the destination register
     // Rn usually is the 1st operand register
-    std::array<_register_type,NUM>registers;
-    // std::array<funcptr, 2^16 = 65536>THUMB_isa;
+    std::array<_register_type,NUM> registers;
+
+    typedef void (Arm7tdmi::*instruction_ptr)(_instruction);
+    std::array<instruction_ptr, 65536> THUMB_isa; // Array of pointers to THUMB instructions
+
     uint8_t ACCESS_MODE=USR;
 
 public:
@@ -140,7 +144,7 @@ public:
     uint32_t fetch(Bus bus_controller);
 
     void decode_executeARM32( _instruction instruction);
-    void decode_executeTHUMB( _instruction instruction);
+    instruction_ptr decode_THUMB( _instruction instruction);
     void decode_execute( _instruction instruction);
 
     int32_t read_from_memory(Bus bus_controller,uint32_t address);
@@ -159,7 +163,8 @@ public:
     _registers get_register(_registers id);
     int32_t get_ALU_op2(_shift type, _instruction ins);
     void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2, bool overflowable);
-//	void build_THUMB_isa(funcptr array[65536])
+
+    void build_THUMB_isa();
 
 public: // ARM32 & THUMB ISA
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR
@@ -199,7 +204,7 @@ public: // ARM32 & THUMB ISA
     void ADD_t(_instruction);           void LDSH_t(_instruction);
     void AND_t(_instruction);           
     void ASR_t(_instruction);           void LSR_t(_instruction);
-    void B_t(_instruction, _cond);      void MOV_t(_instruction);
+    void B_t(_instruction);             void MOV_t(_instruction);
     void Bxx_t(_instruction); /*(?)*/   void MUL_t(_instruction);
     void BIC_t(_instruction);           void MVN_t(_instruction);
     void BL_t(_instruction);            void NEG_t(_instruction);
