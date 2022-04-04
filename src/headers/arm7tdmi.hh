@@ -129,6 +129,7 @@ private:
     // Rd usually is the destination register
     // Rn usually is the 1st operand register
     std::array<_register_type,NUM>registers;
+    // std::array<funcptr, 2^16 = 65536>THUMB_isa;
     uint8_t ACCESS_MODE=USR;
 
 public:
@@ -158,6 +159,7 @@ public:
     _registers get_register(_registers id);
     int32_t get_ALU_op2(_shift type, _instruction ins);
     void set_condition_code_flags(int32_t Rd, int32_t Rn, int32_t op2, bool overflowable);
+//	void build_THUMB_isa(funcptr array[65536])
 
 public: // ARM32 & THUMB ISA
     void undef(_instruction instruction) { std::cout << "undef" << std::endl; } // ERROR

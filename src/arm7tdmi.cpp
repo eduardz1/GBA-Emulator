@@ -5,6 +5,7 @@ Arm7tdmi::Arm7tdmi(){
     /*registers[CPSR].word=2882112257;
     registers[CPSR].M0=0;
     std::cout<<"After cambio"<<(uint)registers[CPSR].word<<std::endl;*/
+	build_THUMB_isa(THUMB_isa);
 }
 
 Arm7tdmi::~Arm7tdmi(){}
