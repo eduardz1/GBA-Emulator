@@ -5,8 +5,7 @@
 #include <iostream>
 #include <functional>
 #include "bus.hh"
-namespace cpu
-{
+
 class Arm7tdmi
 {
 private:
@@ -219,5 +218,4 @@ public: // ARM32 & THUMB ISA
     void LSL_t(_instruction);           void TST_t(_instruction);
     #pragma endregion
 };
-}
 #endif /* !ARM7TDMI_H */

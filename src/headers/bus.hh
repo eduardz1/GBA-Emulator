@@ -6,10 +6,11 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include "arm7tdmi.hh"
 
 class Bus
 {
-private: // should be made private after
+private:
 
     template <typename T> // T is the bit width of the bus
     struct _bus
@@ -22,6 +23,8 @@ private: // should be made private after
         T (Bus::*read_ptr)(struct _bus<T>, int);
         void (Bus::*write_ptr)(struct _bus<T>, int, T);
     };
+
+    Arm7tdmi cpu;
 
 public:
     template <typename T>

@@ -1,5 +1,4 @@
 #include "headers/arm7tdmi.hh"
-using namespace cpu;
 // Rd = Rd + Rs + C-bit (THUMB)
 
 /**

@@ -12,7 +12,7 @@ int main()
     //uint32_t write_try = 98989898;
     //int checks = 17000;
     Bus prova;
-    cpu::Arm7tdmi cpu;
+    Arm7tdmi cpu;
     FILE* bios_bin=fopen("gba_bios.bin","rb");
     prova.init_bios_ram(bios_bin);
     //(prova.*prova.BIOS_ROM.write_ptr)(prova.BIOS_ROM, size, write_try);

@@ -17,8 +17,7 @@ Bus::Bus()
     GamePak_SRAM  = {0, 0b001, 0b001, 0x0E000000, 0x0E00FFFF, &Bus::read<uint8_t>,  &Bus::write<uint8_t> };
 
     // Clearing RAM contents
-    for(auto i = 0; i<RAM.size(); i++)      
-        RAM[i] = 0x1;
+    RAM = {0};
 }
 
 Bus::~Bus()

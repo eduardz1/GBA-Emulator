@@ -1,6 +1,5 @@
 #include "headers/arm7tdmi.hh"
 
-using namespace cpu;
 Arm7tdmi::Arm7tdmi(){
     /*registers[CPSR].word=2882112257;
     registers[CPSR].M0=0;
@@ -83,19 +82,18 @@ Arm7tdmi::_registers Arm7tdmi::get_register(Arm7tdmi::_registers id)
 }
 
 /**
- * @brief On entry:
+ * @brief On entry: \n 
  * 1a - Preserves the address of the next instruction in the appropriate
- *     Link Register, next instruction is specified by the offset parameter
- * \n
- * 2a - Copies CPSR into the appropriate SPSR
- * 3a - Forces the CPSR mode bits to a value which depends on the exception
- * 4a - Forces the PC to fetch the next instruction from the relevant exception vector
+ *     Link Register, next instruction is specified by the offset parameter \n 
+ * 2a - Copies CPSR into the appropriate SPSR \n 
+ * 3a - Forces the CPSR mode bits to a value which depends on the exception \n 
+ * 4a - Forces the PC to fetch the next instruction from the relevant exception vector \n 
  * Entering from THUMB state forces a switch into ARM state when PC is loeaded 
  * with the exception vector address
  * 
- * On completion:
- * 1b - Moves the Link Register, minus an offset where appropriate, to the PC
- * 2b - Copies SPSR back to CPSR
+ * On completion: \n 
+ * 1b - Moves the Link Register, minus an offset where appropriate, to the PC \n 
+ * 2b - Copies SPSR back to CPSR \n 
  * 3b - Clears the interrupt disable flags, if they were set on entry
  */
 void Arm7tdmi::exception_handler(/* _exceptions EXC */)
@@ -190,15 +188,15 @@ Arm7tdmi::_access_mode Arm7tdmi::get_access_mode(){ return (_access_mode)(regist
  *  pointed by op2. Shifts the result as specified by the instruction and
  *  computes the carry carry based on this scheme:
  * 
- *  Carry out 
- *      |----lsl = bit[(31 - (#bit_shift) + 1)]
- *      |----lsr = bit[(#bit_shift) - 1]
- *      |----asr = bit[(#bit_shift) - 1]   
- *      |----ror = bit[(#bit_shift) - 1]
+ *  Carry out \n 
+ *      |----lsl = bit[(31 - (#bit_shift) + 1)] \n
+ *      |----lsr = bit[(#bit_shift) - 1] \n
+ *      |----asr = bit[(#bit_shift) - 1] \n
+ *      |----ror = bit[(#bit_shift) - 1] \n 
  * 
  * @param type type of shift performed
- * @param ins instruction
- * @return second operand  
+ * @param ins instruction 
+ * @return second operand 
  */
 int32_t Arm7tdmi::get_ALU_op2(_shift type, _instruction ins)
 {
@@ -325,7 +323,7 @@ void Arm7tdmi::build_THUMB_isa()
 Arm7tdmi::instruction_ptr Arm7tdmi::decode_THUMB(Arm7tdmi::_instruction ins)
 {
     // Undef when [25:27] -> 011 && [4] set
-    if((ins.word & 0x0E000010) == 0x06000010) return &undef;
+    if((ins.word & 0x0E000010) == 0x06000010) return &Arm7tdmi::undef;
 
     uint8_t hi_byte = ins.halfword_lo >> 8; // isolate hi byte
 
@@ -335,36 +333,36 @@ Arm7tdmi::instruction_ptr Arm7tdmi::decode_THUMB(Arm7tdmi::_instruction ins)
         switch(hi_byte)//bits[8:15]
         {
         case 0x00: case 0x01: case 0x02: case 0x03: 
-        case 0x04: case 0x05: case 0x06: case 0x07: return &LSL_t; // 0000 0xxx
+        case 0x04: case 0x05: case 0x06: case 0x07: return &Arm7tdmi::LSL_t; // 0000 0xxx
         case 0x08: case 0x09: case 0x0C: case 0x0D:
-        case 0x0A: case 0x0B: case 0x0E: case 0x0F: return &LSR_t; // 0000 1xxx
+        case 0x0A: case 0x0B: case 0x0E: case 0x0F: return &Arm7tdmi::LSR_t; // 0000 1xxx
         }
     }
     case 0x1: {
         switch(hi_byte)//bits[8:15]
         {
         case 0x10: case 0x11: case 0x12: case 0x13: 
-        case 0x14: case 0x15: case 0x16: case 0x17: return &ASR_t;  // 0001 0xxx
-        case 0x18: case 0x19: case 0x1C: case 0x1D: return &ADD_t; // 0001 1x0x
-        case 0x1A: case 0x1B: case 0x1E: case 0x1F: return &SUB_t; // 0001 1x1x
+        case 0x14: case 0x15: case 0x16: case 0x17: return &Arm7tdmi::ASR_t;  // 0001 0xxx
+        case 0x18: case 0x19: case 0x1C: case 0x1D: return &Arm7tdmi::ADD_t; // 0001 1x0x
+        case 0x1A: case 0x1B: case 0x1E: case 0x1F: return &Arm7tdmi::SUB_t; // 0001 1x1x
         }
     }
     case 0x2: {
         switch(hi_byte)
         {
         case 0x20: case 0x21: case 0x22: case 0x23:
-        case 0x24: case 0x25: case 0x26: case 0x27: return &MOV_t; // 0010 0xxx
+        case 0x24: case 0x25: case 0x26: case 0x27: return &Arm7tdmi::MOV_t; // 0010 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
-        case 0x2A: case 0x2B: case 0x2E: case 0x2F: return &CMP_t;  // 0010 1xxx
+        case 0x2A: case 0x2B: case 0x2E: case 0x2F: return &Arm7tdmi::CMP_t;  // 0010 1xxx
         }
     }
     case 0x3: {
         switch(hi_byte)
         {
         case 0x20: case 0x21: case 0x22: case 0x23:
-        case 0x24: case 0x25: case 0x26: case 0x27: return &ADD_t; // 0011 0xxx
+        case 0x24: case 0x25: case 0x26: case 0x27: return &Arm7tdmi::ADD_t; // 0011 0xxx
         case 0x28: case 0x29: case 0x2C: case 0x2D:
-        case 0x2A: case 0x2B: case 0x2E: case 0x2F: return &SUB_t; // 0011 1xxx
+        case 0x2A: case 0x2B: case 0x2E: case 0x2F: return &Arm7tdmi::SUB_t; // 0011 1xxx
         }
     }
     case 0x4: {
@@ -373,109 +371,110 @@ Arm7tdmi::instruction_ptr Arm7tdmi::decode_THUMB(Arm7tdmi::_instruction ins)
         case 0x0: { // ALU operations
             switch((ins.halfword_lo & 0x03C0) >> 6) // isolate opcode
             {
-            case 0x0: return &AND_t;
-            case 0x1: return &EOR_t;
-            case 0x2: return &LSL_t;
-            case 0x3: return &LSR_t;
-            case 0x4: return &ASR_t;
-            case 0x5: return &ADC_t;
-            case 0x6: return &SBC_t;
-            case 0x7: return &ROR_t;
-            case 0x8: return &TST_t;
-            case 0x9: return &NEG_t;
-            case 0xA: return &CMP_t;
-            case 0xB: return &CMN_t;
-            case 0xC: return &ORR_t;
-            case 0xD: return &MUL_t;
-            case 0xE: return &BIC_t;
-            case 0xF: return &MVN_t;
+            case 0x0: return &Arm7tdmi::AND_t;
+            case 0x1: return &Arm7tdmi::EOR_t;
+            case 0x2: return &Arm7tdmi::LSL_t;
+            case 0x3: return &Arm7tdmi::LSR_t;
+            case 0x4: return &Arm7tdmi::ASR_t;
+            case 0x5: return &Arm7tdmi::ADC_t;
+            case 0x6: return &Arm7tdmi::SBC_t;
+            case 0x7: return &Arm7tdmi::ROR_t;
+            case 0x8: return &Arm7tdmi::TST_t;
+            case 0x9: return &Arm7tdmi::NEG_t;
+            case 0xA: return &Arm7tdmi::CMP_t;
+            case 0xB: return &Arm7tdmi::CMN_t;
+            case 0xC: return &Arm7tdmi::ORR_t;
+            case 0xD: return &Arm7tdmi::MUL_t;
+            case 0xE: return &Arm7tdmi::BIC_t;
+            case 0xF: return &Arm7tdmi::MVN_t;
             }
         }  
         case 0x1: { // High Register operations/Branch Exchange
             switch(hi_byte & 0x03) // isolate opcode
             {
-            case 0x0: return &ADD_t;
-            case 0x1: return &CMP_t;
-            case 0x2: return &MOV_t;
+            case 0x0: return &Arm7tdmi::ADD_t;
+            case 0x1: return &Arm7tdmi::CMP_t;
+            case 0x2: return &Arm7tdmi::MOV_t;
             case 0x3:
                 if (ins.halfword_lo & 0x0080) // H0[0]
-                    return &BX_t;
+                    return &Arm7tdmi::BX_t;
                 else
-                    return &undef;
+                    return &Arm7tdmi::undef;
             }
         }
-        default: return &LDR_t; // PC-relative Load
+        default: return &Arm7tdmi::LDR_t; // PC-relative Load
         } 
     }
     case 0x5: {
         switch(hi_byte & 0x0E) // isolate [9:11]
         {   // Load/Store with Register Offset
-        case 0x0: return &STR_t;
-        case 0x2: return &STRB_t;
-        case 0x4: return &LDR_t;
-        case 0x6: return &LDRB_t;
+        case 0x0: return &Arm7tdmi::STR_t;
+        case 0x2: return &Arm7tdmi::STRB_t;
+        case 0x4: return &Arm7tdmi::LDR_t;
+        case 0x6: return &Arm7tdmi::LDRB_t;
             // Load/Store Sign-Extended Byte/Halfword
-        case 0x1: return &STRH_t;
-        case 0x3: return &LDRH_t;
-        case 0x5: return &LDRSB_t; // technically should be LDSB but it seems completely equivalent to ARM ::= LDSRB
-        case 0x7: return &LDRSH_t; // same as above
+        case 0x1: return &Arm7tdmi::STRH_t;
+        case 0x3: return &Arm7tdmi::LDRH_t;
+        case 0x5: return &Arm7tdmi::LDRSB_t; // technically should be LDSB but it seems completely equivalent to ARM ::= LDSRB
+        case 0x7: return &Arm7tdmi::LDRSH_t; // same as above
         }
     }
     case 0x6: case 0x7: { // Load/Store with Immediate Offset
         switch(hi_byte & 0x18) // isolate B and L flags
         {
-        case 0x00: return &STR_t;
-        case 0x08: return &LDR_t;
-        case 0x10: return &STRB_t;
-        case 0x18: return &LDRB_t;
+        case 0x00: return &Arm7tdmi::STR_t;
+        case 0x08: return &Arm7tdmi::LDR_t;
+        case 0x10: return &Arm7tdmi::STRB_t;
+        case 0x18: return &Arm7tdmi::LDRB_t;
         }
     }
     case 0x8: // Load/Store Halfword
         if ((hi_byte & 0x08) == 0) // L[0]
-            return &STRH_t; 
+            return &Arm7tdmi::STRH_t; 
         else 
-            return &LDRH_t;  
+            return &Arm7tdmi::LDRH_t;  
     case 0x9: // SP-relative Load/Store
         if ((hi_byte & 0x08) == 0) // L[0]
-            return &STR_t; 
+            return &Arm7tdmi::STR_t; 
         else 
-            return &LDR_t; 
-    case 0xA: return &ADD_a; // Load Address
+            return &Arm7tdmi::LDR_t; 
+    case 0xA: return &Arm7tdmi::ADD_a; // Load Address
     case 0xB: {
         switch(hi_byte)
         {   // Add Offset to Stack Pointer
-        case 0xB0: return &ADD_t;
-        case 0xB1: return &SUB_t;
+        case 0xB0: return &Arm7tdmi::ADD_t;
+        case 0xB1: return &Arm7tdmi::SUB_t;
             // Push/Pop Registers
-        case 0xB4: case 0xB5: return &PUSH_t;
-        case 0xBA: case 0xBB: return &POP_t;
-        default: return &undef;
+        case 0xB4: case 0xB5: return &Arm7tdmi::PUSH_t;
+        case 0xBA: case 0xBB: return &Arm7tdmi::POP_t;
+        default: return &Arm7tdmi::undef;
         }
     }
     case 0xC: // Multiple Load/Store
         if ((hi_byte & 0x08) == 0) // L[0]
-            return &STMIA_t;
+            return &Arm7tdmi::STMIA_t;
         else
-            return &LDMIA_t;
+            return &Arm7tdmi::LDMIA_t;
     
     case 0xD:
         switch(hi_byte & 0x0F) // cond
         {
-        case 0x0F: return &SWI_t;
-        case 0x0E: return &undef;
-        default: return &B_t;
+        case 0x0F: return &Arm7tdmi::SWI_t;
+        case 0x0E: return &Arm7tdmi::undef;
+        default: return &Arm7tdmi::B_t;
         }
     case 0xE:
         if((hi_byte & 0x08) == 0x00)
-            return &B_t;
+            return &Arm7tdmi::B_t;
         else
-            return &undef;
+            return &Arm7tdmi::undef;
     case 0xF:
         if((hi_byte & 0x08) == 0x00) // H[0]
-            return &BL_t;
+            return &Arm7tdmi::BL_t;
         else // ??? not specified ffs, I assume BL
-            return &BL_t;
+            return &Arm7tdmi::BL_t;
     }
+    return &Arm7tdmi::undef;
 }
 
 /*Decoding a single ARM32 instruction*/
