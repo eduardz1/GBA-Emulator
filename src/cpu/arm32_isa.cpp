@@ -1,4 +1,4 @@
-#include "headers/arm7tdmi.hh"
+#include "include/arm7tdmi.hh"
 /*TODO: figuring out a way to pass the bus controller/ram to a method so that it can load/store data*/
 #pragma region // ALU OPERATIONS
 

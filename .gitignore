@@ -38,7 +38,12 @@ master
 # .vscode
 /.vscode
 
+# idea
+/.idea
+
 #BIOS & ROMS
 gba_bios.bin
 *.gba
 *.asm
+/lib/
+/*build*

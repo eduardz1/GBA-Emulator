@@ -1,8 +1,8 @@
-#include "headers/master.hh"
-#include "headers/bus.hh"
-#include "headers/arm7tdmi.hh"
+#include "cpu/include/main.hh"
+#include "cpu/include/bus.hh"
+#include "cpu/include/arm7tdmi.hh"
 #include <memory.h>
-#include <stdint.h>
+#include <cstdint>
 #include <iostream>
 #include <functional>
 

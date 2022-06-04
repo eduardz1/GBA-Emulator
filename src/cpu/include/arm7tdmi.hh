@@ -1,7 +1,7 @@
 #ifndef ARM7TDMI_H
 #define ARM7TDMI_H
 #include <array>
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <functional>
 #include "bus.hh"

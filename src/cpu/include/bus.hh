@@ -1,8 +1,8 @@
 #ifndef BUS_H
 #define BUS_H
 
-#include <stdint.h>
-#include <stdio.h>
+#include <cstdint>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 #include <array>
