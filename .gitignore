@@ -38,6 +38,9 @@ master
 # .vscode
 /.vscode
 
+# visual studio
+/.vs
+
 # idea
 /.idea
 
@@ -46,4 +49,8 @@ gba_bios.bin
 *.gba
 *.asm
 /lib/
+
+
+# build
 /*build*
+/out
