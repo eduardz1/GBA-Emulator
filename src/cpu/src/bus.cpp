@@ -1,4 +1,4 @@
-#include "include/bus.hh"
+#include "../include/GBA-emulator/cpu/bus.hh"
 //TODO: Usare macro per i permessi 
 Bus::Bus()
 {  

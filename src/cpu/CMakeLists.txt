@@ -1,17 +1,29 @@
-# This file handles building each task as sub-project.
-#
-# Each task becomes an independent project in which you can experiment.
-#
-# Tasks are added as separate sub-projects so as compilation errors in
-# one task don't affect another task.
+# setting up sources
+add_library(cpu_lib
+        src/arm7tdmi.cpp
+        src/thumb_isa.cpp
+        src/bus.cpp
+        src/arm32_isa.cpp)
 
-cmake_minimum_required(VERSION 3.22)
-project(GBA_emulator)
+# setting up include directories
+target_include_directories(cpu_lib
+        PUBLIC include
+        PRIVATE src)
 
-set(CMAKE_CXX_STANDARD 14)
+# linking against the desired targets
+target_link_libraries(cpu_lib
+        PRIVATE
+        project_options
+        project_warnings
+        PUBLIC)
 
-include_directories(include)
-add_subdirectory(test)
-# Add tasks subprojects
-#include(cmake/utils.cmake)
-#add_subprojects(${CMAKE_SOURCE_DIR})
+install(TARGETS cpu_lib
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${GBA_emulator}/
+        RUNTIME DESTINATION       ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION       ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION      ${CMAKE_INSTALL_INCLUDEDIR}/${GBA_emulator}/
+        ARCHIVE DESTINATION       ${CMAKE_INSTALL_SHAREDSTATEDIR})
+
+if(ENABLE_TESTING)
+    add_subdirectory(tests)
+endif()

@@ -1,4 +1,4 @@
-#include "include/arm7tdmi.hh"
+#include "../include/GBA-emulator/cpu/arm7tdmi.hh"
 
 Arm7tdmi::Arm7tdmi(){
     /*registers[CPSR].word=2882112257;

@@ -1,4 +1,4 @@
-#include "include/arm7tdmi.hh"
+#include "../include/GBA-emulator/cpu/arm7tdmi.hh"
 // Rd = Rd + Rs + C-bit (THUMB)
 
 /**
