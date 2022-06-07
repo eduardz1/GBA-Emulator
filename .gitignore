@@ -48,8 +48,6 @@ master
 gba_bios.bin
 *.gba
 *.asm
-/lib/
-
 
 # build
 /*build*

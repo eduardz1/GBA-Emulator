@@ -1,6 +1,3 @@
-add_executable(thumb_isa_test
-        thumb_isa_test.cpp
-        ../src/thumb_isa.cpp)
 
 target_include_directories(${GBA_emulator}_test
         PUBLIC ../include
@@ -10,8 +7,15 @@ target_link_libraries(${GBA_emulator}_test
         PRIVATE
         project_options
         project_warnings
-        PUBLIC)
+        PUBLIC
+        GTest::GTest
+        GTest::Main)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(thumb_isa_test)
+# need to look at this 
+add_executabe(${GBA_emulator}_test
+        ${GBA_emulator}_test.cpp)
+        
+# need to look at this 
+add_test(thumb_isa_test
+        thumb_isa_test.cpp
+        ../src/thumb_isa.cpp)
