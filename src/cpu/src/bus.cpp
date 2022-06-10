@@ -1,5 +1,10 @@
 #include "../include/GBA-emulator/cpu/bus.hh"
-//TODO: Usare macro per i permessi 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wbitfield-constant-conversion"
+//TODO: Usare macro per i permessi
+
+namespace cpu
+{
 Bus::Bus()
 {  
     // General Internal Memory
@@ -20,17 +25,20 @@ Bus::Bus()
     RAM = {0};
 }
 
-Bus::~Bus()
-{
-}
+Bus::~Bus() = default;
 /*Writing the BIOS into the RAM,byte per byte*/
-void Bus::init_bios_ram(FILE* bios_stream){
-    FILE* debug_dump=fopen("hex_bios.dump","a+");
-    for(int i=Bus::BIOS_ROM.min_range;i<Bus::BIOS_ROM.max_range;i++){
-        if(fread(&Bus::RAM[i],1,1,bios_stream) == -1){
+void Bus::init_bios_ram(FILE *bios_stream)
+{
+    FILE *debug_dump = fopen("hex_bios.dump", "a+");
+    for (auto i = Bus::BIOS_ROM.min_range; i < Bus::BIOS_ROM.max_range; i++)
+    {
+        if (fread(&Bus::RAM[i], 1, 1, bios_stream) == -1)
+        {
             /*TODO: Error Handling*/
-            printf("FAILING AT READING THE %dTH BYTE OF THE BIOS ROM\n",i);
+            printf("FAILING AT READING THE %dTH BYTE OF THE BIOS ROM\n", i);
         }
-        fprintf(debug_dump,"%02X ",RAM[i]);
+        fprintf(debug_dump, "%02X ", RAM[i]);
     }
 }
+} // namespace cpu
+#pragma clang diagnostic pop
