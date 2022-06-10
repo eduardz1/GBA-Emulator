@@ -31,7 +31,7 @@ class Arm7tdmi
             int32_t Z  : 1;  // Zero FLAG
             int32_t N  : 1;  // Negative/Less than FLAG
         };
-        
+
         int32_t word;
     };
 
@@ -128,11 +128,22 @@ class Arm7tdmi
 
     enum _cond
     {
-        EQ, NE, CS, CC, MI,
-        PL, VS, VC, HI, LS,
-        GE, LT, GT, LE,
-        AL, // unconditional branch
-        RESERVED //THUMB only, it causes the branch to behave like a SWI instruction
+        EQ,
+        NE,
+        CS,
+        CC,
+        MI,
+        PL,
+        VS,
+        VC,
+        HI,
+        LS,
+        GE,
+        LT,
+        GT,
+        LE,
+        AL,      // unconditional branch
+        RESERVED // THUMB only, causes the branch to behave as a SWI instruction
     };
 
     // Rd usually is the destination register
