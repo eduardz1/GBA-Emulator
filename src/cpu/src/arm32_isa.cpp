@@ -17,7 +17,8 @@ void Arm7tdmi::ADD_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = _shift((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = _shift((ins.word >> 5) & 0x2); // bits[5:6] determine the
+                                                     // type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word + op2;
@@ -37,7 +38,8 @@ void Arm7tdmi::ADC_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = _shift((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = _shift((ins.word >> 5) & 0x2); // bits[5:6] determine the
+                                                     // type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word + op2 + registers[get_register(CPSR)].C;
@@ -57,7 +59,8 @@ void Arm7tdmi::SUB_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word - op2;
@@ -77,7 +80,8 @@ void Arm7tdmi::AND_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word & op2;
@@ -97,7 +101,8 @@ void Arm7tdmi::BIC_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word & ~op2;
@@ -117,7 +122,8 @@ void Arm7tdmi::EOR_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word ^ op2;
@@ -137,7 +143,8 @@ void Arm7tdmi::MVN_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = static_cast<int32_t>(0xFFFFFFFF ^ static_cast<unsigned int>(op2));
@@ -157,7 +164,8 @@ void Arm7tdmi::ORR_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word | op2;
@@ -177,7 +185,8 @@ void Arm7tdmi::SBC_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word - op2 + registers[get_register(CPSR)].C - 1;
@@ -197,7 +206,8 @@ void Arm7tdmi::RSB_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = op2 - Rn.word;
@@ -217,7 +227,8 @@ void Arm7tdmi::RSC_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = op2 - Rn.word + registers[get_register(CPSR)].C - 1;
@@ -237,7 +248,8 @@ void Arm7tdmi::CMN_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word + op2;
@@ -256,7 +268,8 @@ void Arm7tdmi::CMP_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word - op2;
@@ -275,7 +288,8 @@ void Arm7tdmi::TEQ_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word ^ op2;
@@ -294,7 +308,8 @@ void Arm7tdmi::TST_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     op2 = get_ALU_op2(shift_type, ins);
     Rd = Rn.word & op2;
@@ -313,7 +328,8 @@ void Arm7tdmi::MOV_a(Arm7tdmi::_instruction ins)
 
     int32_t op2, Rd;
     _register_type Rn = registers[get_register(_registers(ins.Rn))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
     op2 = get_ALU_op2(shift_type, ins);
     Rd = op2;
 
@@ -335,7 +351,8 @@ void Arm7tdmi::MUL_a(Arm7tdmi::_instruction ins)
     int32_t Rd;
     _register_type Rm = registers[get_register(_registers(ins.Rm))];
     _register_type Rs = registers[get_register(_registers(ins.Rs))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     Rd = Rm.word * Rs.word;
     set_register(_registers(ins.Rn),
@@ -357,7 +374,8 @@ void Arm7tdmi::MLA_a(Arm7tdmi::_instruction ins)
     _register_type Rm = registers[get_register(_registers(ins.Rm))];
     _register_type Rs = registers[get_register(_registers(ins.Rs))];
     _register_type Rn = registers[get_register(_registers(ins.Rd))];
-    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine the type of shift
+    auto shift_type = (_shift)((ins.word >> 5) & 0x2); // bits[5:6] determine
+                                                       // the type of shift
 
     Rd = Rm.word * Rs.word + Rn.word;
     set_register(_registers(ins.Rn),
@@ -381,11 +399,14 @@ void Arm7tdmi::SMLAL_a(Arm7tdmi::_instruction ins)
     _register_type Rs = registers[get_register(_registers(ins.Rs))];
     _register_type Rm = registers[get_register(_registers(ins.Rd))];
 
-    rd = Rm.word * Rs.word + (int64_t)(((int64_t)Rd_hi.word << 32) | (Rd_lo.word));
+    rd = Rm.word * Rs.word +
+         (int64_t)(((int64_t)Rd_hi.word << 32) | (Rd_lo.word));
     set_register(_registers(ins.Rd),
-                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka
+                                   // bit[12..15])
     set_register(_registers(ins.Rn),
-                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in
+                                           // rd_high(aka bit[16..19])
 
     if (ins.word & 0x00100000) // flag S set
     {
@@ -409,9 +430,11 @@ void Arm7tdmi::SMULL_a(Arm7tdmi::_instruction ins)
 
     rd = Rm.word * Rs.word;
     set_register(_registers(ins.Rd),
-                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka
+                                   // bit[12..15])
     set_register(_registers(ins.Rn),
-                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in
+                                           // rd_high(aka bit[16..19])
 
     if (ins.word & 0x00100000) // flag S set
     {
@@ -438,9 +461,11 @@ void Arm7tdmi::UMLAL_a(Arm7tdmi::_instruction ins)
     rd = (uint32_t)Rm.word * (uint32_t)Rs.word +
          (uint64_t)(((uint64_t)Rd_hi.word << 32) | (uint32_t(Rd_lo.word)));
     set_register(_registers(ins.Rd),
-                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka
+                                   // bit[12..15])
     set_register(_registers(ins.Rn),
-                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in
+                                           // rd_high(aka bit[16..19])
 
     if (ins.word & 0x00100000) // flag S set
     {
@@ -464,9 +489,11 @@ void Arm7tdmi::UMULL_a(Arm7tdmi::_instruction ins)
 
     rd = (uint32_t)Rm.word * (uint32_t)Rs.word;
     set_register(_registers(ins.Rd),
-                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka bit[12..15])
+                 (rd)&0xFFFFFFFF); // saving lower 32 bits in rd_low(aka
+                                   // bit[12..15])
     set_register(_registers(ins.Rn),
-                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in rd_high(aka bit[16..19])
+                 (rd >> 32) & 0xFFFFFFFF); // saving upper 32 bits in
+                                           // rd_high(aka bit[16..19])
 
     if (ins.word & 0x00100000) // flag S set
     {
@@ -502,7 +529,8 @@ void Arm7tdmi::BX_a(Arm7tdmi::_instruction ins)
     else
         set_mode(ARM_MODE);
 
-    registers[get_register(R15)].word = registers[get_register(_registersins.Rm)].word;
+    registers[get_register(R15)].word =
+        registers[get_register(_registersins.Rm)].word;
 }
 
 /**
@@ -525,8 +553,9 @@ void Arm7tdmi::B_a(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)(ins.cond))) return;
 
-    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend sign of
-                                           // offset and add 2bit left shift
+    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend
+                                           // sign of offset and add 2bit left
+                                           // shift
     registers[get_register(R15)].word += offset;
 }
 
@@ -549,10 +578,12 @@ void Arm7tdmi::BL_a(Arm7tdmi::_instruction ins)
 {
     if (!evaluate_cond((_cond)(ins.cond))) return;
 
-    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend sign of
-                                           // offset and add 2bit left shift
+    int32_t offset = (ins.word << 8) >> 6; // shift left then right to extend
+                                           // sign of offset and add 2bit left
+                                           // shift
     if (ins.word & 0x01000000)
-        set_register(R14, static_cast<uint32_t>(registers[get_register(R15)].word));
+        set_register(R14,
+                     static_cast<uint32_t>(registers[get_register(R15)].word));
 
     registers[get_register(R15)].word += offset;
 }
@@ -585,8 +616,8 @@ void Arm7tdmi::LDR_a(Arm7tdmi::_instruction ins)
                          get_ALU_op2((_shift)((ins.word >> 0x5) & 0x2), ins);
 
     int32_t base_offset;
-    int32_t base_tmp =
-        base_register.word; // saving the original base register for post_index
+    int32_t base_tmp = base_register.word; // saving the original base register
+                                           // for post_index
 
     base_offset = (ins.word & 0x800000) ? base_register.word + offset :
                                           base_register.word - offset;
@@ -594,59 +625,45 @@ void Arm7tdmi::LDR_a(Arm7tdmi::_instruction ins)
                clear -> post-index:  add offset to base register after  loading
      */
     if (ins.word & 0x1000000)
-    {   // bit[24] set
-        // read_from_memory()
+    { // bit[24] set
+      // read_from_memory()
     }
 }
 
 void Arm7tdmi::LDRB_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::STR_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::STRB_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 #pragma endregion
 #pragma region // Halfword and Signed Data Transfer
 void Arm7tdmi::LDRH_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::STRH_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::LDRSB_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::LDRSH_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 #pragma endregion
 #pragma region // Block Data Transfer
 void Arm7tdmi::STM_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::LDM_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 #pragma endregion
 #pragma region // PSR Transfer
 void Arm7tdmi::MRS_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::MSR_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 #pragma endregion
 void Arm7tdmi::SWI_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::SWP_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 void Arm7tdmi::SWPB_a(Arm7tdmi::_instruction ins)
-{
-}
+{}
 
 } // namespace cpu

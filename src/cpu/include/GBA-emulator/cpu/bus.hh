@@ -11,13 +11,15 @@
 
 namespace cpu
 {
-class Bus {
+class Bus
+{
   private:
     template <typename T> // T is the bit width of the bus
-    struct _bus {
-        T        bitfield;
-        char     r_perm : 3; // 32/16/8 bit read
-        char     w_perm : 3; // 32/16/8 bit write
+    struct _bus
+    {
+        T bitfield;
+        char r_perm : 3; // 32/16/8 bit read
+        char w_perm : 3; // 32/16/8 bit write
         uint32_t min_range,
             max_range; // minimum and maximum addressable range for a given bus
 
@@ -40,16 +42,26 @@ class Bus {
     void init_bios_ram(FILE *bios_stream);
 
   public:
-    struct _bus<uint32_t> BIOS_ROM {};
-    struct _bus<uint32_t> WRAM_32K {};
-    struct _bus<uint32_t> IO {};
-    struct _bus<uint32_t> OAM {};
-    struct _bus<uint16_t> WRAM_256K {};
-    struct _bus<uint16_t> P_RAM {};
-    struct _bus<uint16_t> VRAM {};
-    struct _bus<uint16_t> GamePak_ROM {};
-    struct _bus<uint16_t> GamePak_Flash {};
-    struct _bus<uint8_t>  GamePak_SRAM {};
+    struct _bus<uint32_t> BIOS_ROM
+    {};
+    struct _bus<uint32_t> WRAM_32K
+    {};
+    struct _bus<uint32_t> IO
+    {};
+    struct _bus<uint32_t> OAM
+    {};
+    struct _bus<uint16_t> WRAM_256K
+    {};
+    struct _bus<uint16_t> P_RAM
+    {};
+    struct _bus<uint16_t> VRAM
+    {};
+    struct _bus<uint16_t> GamePak_ROM
+    {};
+    struct _bus<uint16_t> GamePak_Flash
+    {};
+    struct _bus<uint8_t> GamePak_SRAM
+    {};
 
     // RAM of 4 MB = 2^32 = width of the bus
     /*TODO: fix the size*/

@@ -12,11 +12,9 @@ AlignArrayOfStructures: Left
 AlignConsecutiveBitFields: Consecutive
 
 BraceWrapping:
-  AfterClass: false
-  AfterEnum: false
-  AfterStruct: false
-  AfterUnion: false
-  AfterFunction: false
+  SplitEmptyFunction: false
+  SplitEmptyNamespace: false
+  SplitEmptyRecord: false
 
 # Penalties taken from https://github.com/git/git/commit/42efde4c299141ddf1ca5b63909b94ab3875aa14
 # This decides what order things should be done if a line is too long
